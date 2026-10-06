@@ -1,0 +1,93 @@
+{
+  "_note": "게임에 포함되는 정적 데이터. 진실·비밀 등 스포일러는 넣지 않는다. 나이·직업 등 설정은 docs/design/game-design-v1.md에 둔다.",
+  "rooms": ["harin", "nayeon", "chaerin", "sera", "j"],
+  "characters": [
+    {
+      "id": "dohha",
+      "name": "윤도하",
+      "role": "player",
+      "speechStyle": "adaptive",
+      "profiles": {
+        "default": { "color": "#4A6FA5", "icon": "D", "image": null }
+      }
+    },
+    {
+      "id": "harin",
+      "name": "서하린",
+      "displayName": "010-****-2291",
+      "role": "heroine",
+      "route": "harin",
+      "speechStyle": "polite_soft",
+      "profiles": {
+        "default": { "color": "#E8D5B7", "icon": "H", "image": null }
+      }
+    },
+    {
+      "id": "nayeon",
+      "name": "강나연",
+      "displayName": "010-****-5530",
+      "role": "heroine",
+      "route": "nayeon",
+      "speechStyle": "blunt_short",
+      "profiles": {
+        "default": { "color": "#1F2A44", "icon": "N", "image": null }
+      }
+    },
+    {
+      "id": "chaerin",
+      "name": "오채린",
+      "displayName": "010-****-7046",
+      "role": "heroine",
+      "route": "chaerin",
+      "speechStyle": "polite_emoji",
+      "profiles": {
+        "default": { "color": "#FFB6C9", "accent": "#FFE066", "icon": "C", "image": null }
+      }
+    },
+    {
+      "id": "sera",
+      "name": "문세라",
+      "displayName": "010-****-1188",
+      "role": "heroine",
+      "route": "sera",
+      "speechStyle": "dry_terse",
+      "profiles": {
+        "default": { "color": "#6B7280", "accent": "#39FF9C", "icon": "S", "image": null }
+      }
+    },
+    {
+      "id": "j",
+      "name": "J",
+      "displayName": "010-****-0317",
+      "role": "heroine_locked",
+      "route": "j",
+      "speechStyle": "formal_restrained",
+      "profiles": {
+        "default": { "color": "#2B2B2B", "icon": "#", "image": null, "glitch": true },
+        "unlocked": { "color": "#8B7EC8", "icon": "J", "image": null }
+      },
+      "unlock": {
+        "all": [
+          { "cleared": { "route": "harin", "excludeTypes": ["bad"] } },
+          { "cleared": { "route": "nayeon", "excludeTypes": ["bad"] } },
+          { "cleared": { "route": "chaerin", "excludeTypes": ["bad"] } },
+          { "cleared": { "route": "sera", "excludeTypes": ["bad"] } }
+        ]
+      }
+    },
+    {
+      "id": "system",
+      "name": "시스템",
+      "role": "system",
+      "speechStyle": "system",
+      "profiles": {
+        "default": { "color": "#9CA3AF", "icon": "!", "image": null }
+      }
+    }
+  ],
+  "stats": {
+    "affection": { "targets": ["harin", "nayeon", "chaerin", "sera"], "min": 0, "max": 10 },
+    "clue": { "min": 0, "max": 99 },
+    "alert": { "min": 0, "max": 10 }
+  }
+}

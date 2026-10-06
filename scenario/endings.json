@@ -1,0 +1,26 @@
+{
+  "_note": "엔딩 전체 목록. 갤러리(미획득 엔딩 빈칸 표시)와 lint의 기준 데이터. 정적 파일이므로 제목에 진실을 드러내는 표현을 쓰지 않는다. 제목은 초안이며 PM이 확정한다.",
+  "types": ["good", "normal", "bad", "true"],
+  "endings": [
+    { "id": "A",   "route": "prologue", "type": "bad",    "title": "약속 장소의 그림자", "order": 1 },
+
+    { "id": "H-1", "route": "harin",    "type": "good",   "title": "따뜻한 안부",         "order": 2 },
+    { "id": "H-2", "route": "harin",    "type": "normal", "title": "말하지 못한 이야기",   "order": 3 },
+    { "id": "H-3", "route": "harin",    "type": "bad",    "title": "닫힌 카페",           "order": 4 },
+
+    { "id": "N-1", "route": "nayeon",   "type": "good",   "title": "같은 편",             "order": 5 },
+    { "id": "N-2", "route": "nayeon",   "type": "normal", "title": "엇갈린 보고",         "order": 6 },
+    { "id": "N-3", "route": "nayeon",   "type": "bad",    "title": "접근 금지",           "order": 7 },
+
+    { "id": "C-1", "route": "chaerin",  "type": "good",   "title": "괜찮다는 말",         "order": 8 },
+    { "id": "C-2", "route": "chaerin",  "type": "normal", "title": "답장이 없는 밤",      "order": 9 },
+    { "id": "C-3", "route": "chaerin",  "type": "bad",    "title": "마지막으로 읽은 메시지", "order": 10 },
+
+    { "id": "S-1", "route": "sera",     "type": "good",   "title": "공정한 거래",         "order": 11 },
+    { "id": "S-2", "route": "sera",     "type": "normal", "title": "조건부 신뢰",         "order": 12 },
+    { "id": "S-3", "route": "sera",     "type": "bad",    "title": "차단된 번호",         "order": 13 },
+
+    { "id": "J-1", "route": "j",        "type": "true",   "title": "수신 가능",           "order": 14 },
+    { "id": "J-2", "route": "j",        "type": "bad",    "title": "발신자 불명",         "order": 15 }
+  ]
+}

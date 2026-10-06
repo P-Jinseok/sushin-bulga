@@ -1,0 +1,26 @@
+{
+  "sceneId": "prologue_s8",
+  "title": "약속",
+  "route": "prologue",
+  "room": "j",
+  "time": "22:30",
+  "day": "화요일",
+  "start": "p8_001",
+  "nodes": [
+    {"id": "p8_001", "type": "fx", "kind": "time_jump", "time": "22:30", "day": "화요일"},
+    {"id": "p8_002", "type": "msg", "speaker": "system", "text": "밤 10시 30분. 오늘 하루, 모두가 같은 시각을 이야기했다.", "delay": 2200},
+    {"id": "p8_003", "type": "msg", "speaker": "system", "text": "밤 11시. 청하천 3번 다리.", "delay": 1800},
+    {"id": "p8_004", "type": "msg", "speaker": "j", "text": "…결정하셨나요?", "delay": 2000},
+    {"id": "p8_005", "type": "msg", "speaker": "j", "text": "누구와 가시든 말리지는 않아요.", "delay": 2200},
+    {"id": "p8_006", "type": "msg", "speaker": "j", "text": "다만 혼자는 위험해요.", "delay": 2200},
+    {"id": "p8_007", "type": "msg", "speaker": "system", "text": "60초 안에 정해야 한다. 누구에게 연락할까.", "delay": 1500},
+    {"id": "p8_008", "type": "choice", "timer": 60, "options": [{"text": "서하린에게 연락한다", "tone": "calm", "send": false, "next": "p8_p_harin", "effects": {"flags": {"route_pick_harin": true}}, "if": {"all": [{"stat": "affection.harin", "gte": 3}, {"flag": "clue_harin_1"}]}, "lockedMode": "disable", "lockedHint": "아직 그녀의 이야기를 충분히 듣지 못했다."}, {"text": "강나연에게 연락한다", "tone": "calm", "send": false, "next": "p8_p_nayeon", "effects": {"flags": {"route_pick_nayeon": true}}, "if": {"all": [{"stat": "affection.nayeon", "gte": 3}, {"flag": "clue_nayeon_1"}]}, "lockedMode": "disable", "lockedHint": "아직 그녀의 신뢰를 얻지 못했다."}, {"text": "오채린에게 연락한다", "tone": "calm", "send": false, "next": "p8_p_chaerin", "effects": {"flags": {"route_pick_chaerin": true}}, "if": {"all": [{"stat": "affection.chaerin", "gte": 3}, {"flag": "clue_chaerin_1"}]}, "lockedMode": "disable", "lockedHint": "아직 그녀의 속마음을 듣지 못했다."}, {"text": "문세라에게 연락한다", "tone": "calm", "send": false, "next": "p8_p_sera", "effects": {"flags": {"route_pick_sera": true}}, "if": {"all": [{"stat": "affection.sera", "gte": 3}, {"flag": "clue_sera_1"}]}, "lockedMode": "disable", "lockedHint": "아직 그녀와 손잡을 근거가 부족하다."}, {"text": "아무에게도 알리지 않고 혼자 간다", "tone": "avoid", "send": false, "next": "p8_alone"}], "timeoutNext": "p8_alone", "timeoutEffects": {"alert": 1}},
+    {"id": "p8_p_harin", "type": "msg", "speaker": "dohha", "text": "오늘 밤 11시, 청하천 3번 다리에 같이 가 주실 수 있어요?", "delay": 1200, "room": "harin", "next": "p8_end"},
+    {"id": "p8_p_nayeon", "type": "msg", "speaker": "dohha", "text": "오늘 밤 11시, 청하천 3번 다리에 가려고 합니다. 와 주실 수 있어요?", "delay": 1320, "room": "nayeon", "next": "p8_end"},
+    {"id": "p8_p_chaerin", "type": "msg", "speaker": "dohha", "text": "오늘 밤 11시, 청하천 3번 다리에 같이 가 줄 수 있어요?", "delay": 1180, "room": "chaerin", "next": "p8_end"},
+    {"id": "p8_p_sera", "type": "msg", "speaker": "dohha", "text": "오늘 밤 11시, 청하천 3번 다리. 같이 가요.", "delay": 1040, "room": "sera", "next": "p8_end"},
+    {"id": "p8_alone", "type": "effect", "effects": {"flags": {"route_pick_alone": true}}},
+    {"id": "p8_014", "type": "msg", "speaker": "system", "text": "아무에게도 알리지 않았다.", "delay": 1800},
+    {"id": "p8_end", "type": "end_scene", "next": "prologue_s9"}
+  ]
+}

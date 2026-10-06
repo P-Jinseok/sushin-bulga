@@ -1,0 +1,30 @@
+{
+  "sceneId": "prologue_s3",
+  "title": "조사",
+  "route": "prologue",
+  "room": "j",
+  "time": "23:30",
+  "day": "월요일",
+  "start": "p3_001",
+  "nodes": [
+    {"id": "p3_001", "type": "msg", "speaker": "system", "text": "대화가 끝난 뒤에도 이름 하나가 머릿속에 남았다.", "delay": 1800},
+    {"id": "p3_002", "type": "msg", "speaker": "system", "text": "한유진.", "delay": 1200},
+    {"id": "p3_003", "type": "choice", "timer": 0, "options": [{"text": "한유진을 검색해 본다", "tone": "calm", "send": false, "next": "p3_search"}, {"text": "J에게 한 번 더 묻는다", "tone": "direct", "send": "한유진 씨는 어떤 사람이었어요?", "next": "p3_askj"}, {"text": "신경 끄고 잔다", "tone": "avoid", "send": false, "next": "p3_sleep"}]},
+    {"id": "p3_askj", "type": "msg", "speaker": "j", "text": "…직접 보세요. 제가 말하면 편견이 생길 거예요.", "delay": 2185},
+    {"id": "p3_005", "type": "msg", "speaker": "j", "text": "'청하동 실종자를 찾습니다'. 그 게시글이면 돼요.", "delay": 2240},
+    {"id": "p3_006", "type": "msg", "speaker": "j", "text": "다만 한 가지만 말할게요. 그 사람은 약속을 어기는 사람이 아니었어요.", "delay": 2800},
+    {"id": "p3_007", "type": "msg", "speaker": "system", "text": "결국 검색창을 열었다.", "delay": 900, "next": "p3_search"},
+    {"id": "p3_search", "type": "effect", "effects": {"clue": 1, "flags": {"searched_yujin": true}}},
+    {"id": "p3_009", "type": "msg", "speaker": "system", "text": "[검색] 청하동 한유진", "delay": 1500},
+    {"id": "p3_010", "type": "msg", "speaker": "system", "text": "'청하동 실종자를 찾습니다' — 한유진(당시 29세).", "delay": 2200},
+    {"id": "p3_011", "type": "msg", "speaker": "system", "text": "지난해 이맘때 밤, 청하천 3번 다리 부근에서 마지막으로 목격됨.", "delay": 2600},
+    {"id": "p3_012", "type": "msg", "speaker": "system", "text": "경찰은 단순 잠적 가능성이 높다고 했지만, 가족은 받아들이지 않았다.", "delay": 2800},
+    {"id": "p3_013", "type": "msg", "speaker": "system", "text": "댓글 — '아직도 소식 없나요…'", "delay": 1500},
+    {"id": "p3_014", "type": "msg", "speaker": "system", "text": "마지막 갱신은 석 달 전이었다.", "delay": 1800},
+    {"id": "p3_015", "type": "msg", "speaker": "system", "text": "사진 아래, 지워진 번호 한 줄. 방금 문자가 온 자리와 같았다.", "delay": 2800, "next": "p3_merge"},
+    {"id": "p3_sleep", "type": "msg", "speaker": "system", "text": "불을 껐다. 하지만 문자 속 한 줄이 계속 떠올랐다.", "delay": 2200},
+    {"id": "p3_017", "type": "msg", "speaker": "system", "text": "'그 열쇠는 아무한테도 보여주면 안 돼.'", "delay": 2000, "next": "p3_merge"},
+    {"id": "p3_merge", "type": "msg", "speaker": "system", "text": "새벽 한 시가 넘어서야 겨우 잠들었다.", "delay": 2000},
+    {"id": "p3_019", "type": "end_scene", "next": "prologue_s4"}
+  ]
+}

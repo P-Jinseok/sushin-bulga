@@ -1,0 +1,19 @@
+{
+  "sceneId": "prologue_s1",
+  "title": "첫 문자",
+  "route": "prologue",
+  "room": "j",
+  "time": "23:07",
+  "day": "월요일",
+  "start": "p1_001",
+  "nodes": [
+    {"id": "p1_001", "type": "msg", "speaker": "system", "text": "이사 첫날 밤. 새 번호를 개통한 지 세 시간이 지났다.", "delay": 1500},
+    {"id": "p1_002", "type": "msg", "speaker": "system", "text": "저장된 연락처는 아직 하나도 없다.", "delay": 1500},
+    {"id": "p1_003", "type": "msg", "speaker": "j", "text": "내일 밤 11시, 약속 잊지 마.", "delay": 1800, "lintIgnore": ["voice"]},
+    {"id": "p1_004", "type": "msg", "speaker": "j", "text": "그 열쇠는 아무한테도 보여주면 안 돼.", "delay": 2200, "lintIgnore": ["voice"]},
+    {"id": "p1_005", "type": "fx", "kind": "glitch", "target": "name", "duration": 1200},
+    {"id": "p1_006", "type": "msg", "speaker": "system", "text": "모르는 번호다. 약속? 열쇠?", "delay": 1500},
+    {"id": "p1_007", "type": "choice", "timer": 0, "options": [{"text": "잘못 보내신 것 같은데요.", "tone": "calm", "next": "p1_end", "effects": {"flags": {"replied_j": true}}}, {"text": "누구세요?", "tone": "direct", "next": "p1_end", "effects": {"clue": 1, "flags": {"replied_j": true, "asked_who": true}}}, {"text": "(무시한다)", "tone": "avoid", "send": false, "next": "p1_end", "effects": {"flags": {"ignored_j": true}}}]},
+    {"id": "p1_end", "type": "end_scene", "next": "prologue_s2"}
+  ]
+}
