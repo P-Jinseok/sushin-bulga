@@ -26,8 +26,9 @@ export function createRunner({ loadScene, presenter, clock, config, state, meta 
     return cloneState(state);
   }
 
-  function autosave() {
-    hooks.autosave?.(snapshot());
+  // reason: 'scene'(장면 진입) | 'choice'(선택 직후) | 'timeout'(제한시간 초과 직후)
+  function autosave(reason) {
+    hooks.autosave?.(snapshot(), reason);
   }
 
   // 한 번만 적용되는 상태 변경을 대기 목록에 올린다. 시간이 되면 또는 저장 직전에 적용된다.
@@ -62,7 +63,7 @@ export function createRunner({ loadScene, presenter, clock, config, state, meta 
     const start = resuming ? nodeId : scene.start ?? scene.nodes[0].id;
     state.position = { sceneId: scene.sceneId, nodeId: start };
     await call('sceneStart', { scene, state, resumed: resuming });
-    if (!resuming) autosave();
+    if (!resuming) autosave('scene');
     return start;
   }
 
@@ -146,7 +147,7 @@ export function createRunner({ loadScene, presenter, clock, config, state, meta 
       next = opt.next;
     }
     state.position = { sceneId: scene.sceneId, nodeId: next };
-    autosave(); // 선택 직후 (DEC-017)
+    autosave(result.timeout ? 'timeout' : 'choice'); // 선택·시간 초과 직후 (DEC-017, DEC-025)
     return next;
   }
 
@@ -244,9 +245,9 @@ export function createRunner({ loadScene, presenter, clock, config, state, meta 
           break;
         case 'ending': {
           const ending = config.endings.get(node.endingId) ?? null;
-          if (meta) recordEnding(meta, node.endingId);
-          hooks.onEnding?.(node.endingId, ending);
-          await call('ending', { endingId: node.endingId, ending });
+          const isNew = meta ? recordEnding(meta, node.endingId) : false;
+          hooks.onEnding?.(node.endingId, ending, { isNew });
+          await call('ending', { endingId: node.endingId, ending, isNew });
           return { endingId: node.endingId };
         }
         case 'end_scene':

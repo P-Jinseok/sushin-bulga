@@ -13,7 +13,7 @@ export function createDebugPanel(getInfo) {
   return {
     el,
     update() {
-      const { state, lastSave } = getInfo();
+      const { state, lastSave, meta } = getInfo();
       pre.textContent = JSON.stringify(
         {
           position: state.position,
@@ -22,6 +22,7 @@ export function createDebugPanel(getInfo) {
           flags: state.flags,
           contacts: state.contacts,
           lastAutosave: lastSave,
+          seenEndings: meta?.seenEndings,
         },
         null,
         1,

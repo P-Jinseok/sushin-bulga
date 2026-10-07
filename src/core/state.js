@@ -1,5 +1,6 @@
 // 게임 상태: 수치·플래그·위치·연락처·대화방 기록(읽음 포함)·시계.
 // 대화 기록은 문장이 아니라 장면 id + 노드 id (+ 선택 번호)만 저장한다.
+// 표시 시각(time, day)과 전체 순서(seq)는 기록 시점에 함께 남긴다 (불러오기 때 화면 재구성용).
 
 export const STATE_VERSION = 1;
 
@@ -14,6 +15,7 @@ export function createState(config) {
     contacts: {},
     rooms: {},
     clock: { day: null, time: null },
+    seq: 0, // 대화 기록 전체 순번 (방 목록 최근 순 정렬에 사용)
   };
 }
 
@@ -52,6 +54,8 @@ function roomOf(state, room) {
 }
 
 export function addLogEntry(state, room, entry) {
+  state.seq = (state.seq ?? 0) + 1;
+  Object.assign(entry, { time: state.clock.time, day: state.clock.day, seq: state.seq });
   roomOf(state, room).log.push(entry);
   return entry;
 }

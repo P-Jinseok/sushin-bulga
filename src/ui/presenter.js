@@ -1,19 +1,41 @@
 // runner ↔ 화면 연결. runner가 호출하는 presenter 인터페이스(engine-design.md 3-1)를 구현한다.
 //
-// 방 전환 규칙 (M2-4):
-// - 장면이 시작되면 그 장면의 기본 방(scene.room)을 연다.
-// - 지금 보고 있지 않은 방에 메시지가 오면 그 방의 안 읽은 수만 올린다 (알림 배너는 M2-6).
+// 방 전환·알림 규칙:
+// - 장면이 시작되면 그 장면의 기본 방(scene.room)을 연다 (DEC-037).
+//   예외(DEC-045): 장면 시작부터 첫 msg 전에 fx notify가 먼저 오면 방을 바로 열지 않는다.
+//   (잠금화면 알림 연출) 배너를 탭하거나 그 방에 첫 메시지가 도착하면 연다.
+// - 지금 보고 있지 않은 방에 상대 메시지가 오면 그 방의 안 읽은 수를 올리고 상단 배너로 알린다 (M2-6).
+// - fx notify는 보고 있는 방과 관계없이 배너로 알린다 (메시지는 오지 않음).
 // - 선택지가 다른 방에 있으면 선택지 영역에 "○○ 대화방에서 답장 대기" 버튼을 보여 준다.
+//   배너는 잠깐 뜨는 새 메시지 알림, 답장 대기 버튼은 계속 남는 안내로 역할을 나눈다.
+// - 대화 기록이 없는 인물은 방 목록에 없다. 첫 메시지가 도착하면 방이 생긴다 (DEC-038).
 
 import { h } from './dom.js';
 import { createAvatar } from './avatar.js';
 import { createChatView } from './chat-view.js';
 import { createRoomList } from './room-list.js';
 import { createChoiceView } from './choice-view.js';
+import { createBanner } from './banner.js';
+import { createEndingScreen } from './screens.js';
 
 const STATE_FX = new Set(['delete_msg', 'send_fail', 'time_jump']);
+const BRANCH = new Set(['choice', 'cond', 'switch', 'ending', 'end_scene']);
 
-export function createPresenter({ app, config, getState, clock, onRestart, onChange }) {
+// 장면 시작 노드부터 첫 msg 전에 notify가 있는지 (time_jump 등 다른 노드는 건너뛰며 판단, DEC-045)
+export function notifyBeforeFirstMsg(scene, startId) {
+  const index = new Map(scene.nodes.map((n, i) => [n.id, i]));
+  let i = index.get(startId) ?? 0;
+  for (let steps = 0; i !== undefined && i < scene.nodes.length && steps < 100; steps++) {
+    const n = scene.nodes[i];
+    if (n.type === 'msg' || BRANCH.has(n.type)) return false;
+    if (n.type === 'fx' && n.kind === 'notify') return true;
+    i = n.next ? index.get(n.next) : i + 1;
+  }
+  return false;
+}
+
+// onTitle: 타이틀로 돌아가기, getGallery: () => { seen, total } (엔딩 화면 표시용)
+export function createPresenter({ app, config, getState, clock, onTitle, onChange, onMenu, getGallery }) {
   const display = {
     name(id) {
       const c = config.characters.get(id);
@@ -25,22 +47,28 @@ export function createPresenter({ app, config, getState, clock, onRestart, onCha
   };
 
   const rooms = new Map();
-  let seq = 0;
   let current = null; // 보고 있는 방 id, null이면 목록 화면
   let pending = null; // 대기 중인 선택지 { room, view, resolve }
   let ended = false;
+  let deferredRoom = null; // DEC-045: 첫 메시지(또는 배너 탭) 때 열 방
 
   const roomOf = (id) => {
     if (!rooms.has(id)) rooms.set(id, { id, items: [], unread: 0, seq: 0, typing: null });
     return rooms.get(id);
   };
 
-  const chat = createChatView({ display, onBack: () => openList(), onSkip: () => clock.skip() });
-  const list = createRoomList({ display, onOpen: (id) => openRoom(id) });
+  const chat = createChatView({ display, onBack: () => openList(), onSkip: () => clock.skip(), onMenu });
+  const list = createRoomList({ display, onOpen: (id) => openRoom(id), onMenu });
   // 선택지 영역이 생기거나 사라지면 메시지 목록 높이가 바뀐다 → 맨 아래를 보고 있었다면 유지
   const choices = Object.fromEntries(
     Object.entries(createChoiceView(chat.choiceArea)).map(([name, fn]) => [name, (...args) => chat.keepBottom(() => fn(...args))]),
   );
+  const banner = createBanner({ display, onOpen: (id) => openRoom(id) });
+
+  // 화면(목록·대화방)은 host 안에서 바꾸고, 배너는 그 위에 겹쳐 둔다
+  const host = h('div', { class: 'screen-host' });
+  app.replaceChildren(host, banner.el);
+  const show = (screen) => host.replaceChildren(screen);
 
   function refreshStatus() {
     const t = getState().clock.time;
@@ -70,10 +98,12 @@ export function createPresenter({ app, config, getState, clock, onRestart, onCha
   }
 
   function openRoom(id) {
+    if (id === deferredRoom) deferredRoom = null;
     current = id;
     const room = roomOf(id);
     room.unread = 0;
-    app.replaceChildren(chat.el); // 화면에 붙인 뒤 그려야 맨 아래로 스크롤된다
+    if (banner.room === id) banner.hide();
+    show(chat.el); // 화면에 붙인 뒤 그려야 맨 아래로 스크롤된다
     chat.show(room);
     renderChoiceArea();
     refreshStatus();
@@ -83,12 +113,12 @@ export function createPresenter({ app, config, getState, clock, onRestart, onCha
   function openList() {
     current = null;
     renderList();
-    app.replaceChildren(list.el);
+    show(list.el);
     refreshStatus();
     onChange?.();
   }
 
-  function itemKind(speaker) {
+  function kindOf(speaker) {
     if (speaker === config.playerId) return 'me';
     if (speaker === config.systemId) return 'system';
     return 'other';
@@ -98,9 +128,24 @@ export function createPresenter({ app, config, getState, clock, onRestart, onCha
     get currentRoom() {
       return current;
     },
+    get ended() {
+      return ended;
+    },
+
+    // 불러오기: transcript.rebuildRooms() 결과로 대화방을 채운다. 이후 runner가 sceneStart로 방을 연다.
+    restore({ rooms: rebuilt }) {
+      rooms.clear();
+      for (const r of rebuilt) rooms.set(r.id, { id: r.id, items: r.items, unread: 0, seq: r.seq, typing: null });
+    },
 
     // ── runner 인터페이스 ──
-    sceneStart({ scene }) {
+    sceneStart({ scene, state, resumed }) {
+      if (!resumed && notifyBeforeFirstMsg(scene, state.position?.nodeId)) {
+        // 알림이 먼저 온다: 지금 보던 화면을 그대로 두고(처음이면 목록) 그 방은 나중에 연다
+        deferredRoom = scene.room;
+        if (!host.firstChild) openList();
+        return;
+      }
       openRoom(scene.room);
     },
 
@@ -111,12 +156,15 @@ export function createPresenter({ app, config, getState, clock, onRestart, onCha
 
     message({ room, speaker, text, entry }) {
       const r = roomOf(room);
-      const { time, day } = getState().clock;
-      const item = { entry, speaker, text, time, day, kind: itemKind(speaker) };
+      const item = { entry, speaker, text, time: entry.time ?? null, day: entry.day ?? null, kind: kindOf(speaker) };
       r.items.push(item);
-      r.seq = ++seq;
-      if (room === current) chat.append(item);
-      else if (item.kind === 'other') r.unread++;
+      r.seq = entry.seq ?? r.seq + 1;
+      if (room === deferredRoom) openRoom(room); // 미뤄 둔 방은 첫 메시지가 오면 연다 (방금 넣은 메시지까지 그려짐)
+      else if (room === current) chat.append(item);
+      else if (item.kind === 'other') {
+        r.unread++;
+        banner.show({ room, text });
+      }
       if (current === null) renderList();
       refreshStatus();
       onChange?.();
@@ -143,8 +191,12 @@ export function createPresenter({ app, config, getState, clock, onRestart, onCha
       });
     },
 
-    fx({ node }) {
-      // 연출 렌더링은 M2-9. 여기서는 core가 바꾼 상태(삭제·전송 실패·시각)만 화면에 반영한다.
+    fx({ node, room }) {
+      if (node.kind === 'notify') {
+        banner.show({ room, text: node.text });
+        return;
+      }
+      // 그 밖의 연출 렌더링은 M2-9. 여기서는 core가 바꾼 상태(삭제·전송 실패·시각)만 화면에 반영한다.
       if (!STATE_FX.has(node.kind)) return;
       queueMicrotask(() => {
         const r = current !== null ? rooms.get(current) : null;
@@ -161,29 +213,27 @@ export function createPresenter({ app, config, getState, clock, onRestart, onCha
       onChange?.();
     },
 
-    ending({ endingId, ending }) {
+    ending({ endingId, ending, isNew }) {
       ended = true;
       pending = null;
-      if (current === null) openRoom([...rooms.values()].sort((a, b) => b.seq - a.seq)[0]?.id ?? 'j');
-      chat.appendCard(
-        h(
-          'div',
-          { class: 'ending-card', role: 'status' },
-          h('div', { class: 'ending-card__label' }, `엔딩 ${endingId}`),
-          h('div', { class: 'ending-card__title' }, ending?.title ?? ''),
-        ),
-      );
-      choices.showButton('처음부터 다시', onRestart);
+      banner.hide();
+      choices.clear();
+      const { seen, total } = getGallery();
+      const screen = createEndingScreen({ endingId, ending, isNew, seen, total, onTitle });
+      app.append(screen);
+      screen.querySelector('button')?.focus();
       onChange?.();
     },
 
-    // 진행을 멈추고 안내한다. kind: 'stop'(아직 없는 장면 등, 정상 종료에 가까움) | 'error'
+    // 진행을 멈추고 안내한다. kind: 'stop'(아직 없는 장면 등, 정상 종료에 가까움) | 'error' | 'info'(진행은 계속)
     showNotice(message, kind = 'error') {
-      ended = true;
-      pending = null;
-      if (current === null) app.replaceChildren(chat.el);
+      if (kind !== 'info') {
+        ended = true;
+        pending = null;
+      }
+      if (current === null) show(chat.el);
       chat.appendCard(h('div', { class: `ending-card ending-card--${kind}`, role: kind === 'error' ? 'alert' : 'status' }, message));
-      choices.showButton('처음부터 다시', onRestart);
+      if (kind !== 'info') choices.showButton('타이틀로', onTitle);
       onChange?.();
     },
   };

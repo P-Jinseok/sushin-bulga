@@ -39,7 +39,7 @@
     {"id": "p7_m_end", "type": "msg", "speaker": "sera", "text": "이걸 열어. 신호 경로를 보여줄 거야.", "delay": 1855},
     {"id": "p7_031", "type": "msg", "speaker": "sera", "text": "[링크] 신호 경로 확인", "delay": 1500},
     {"id": "p7_032", "type": "choice", "timer": 0, "options": [{"text": "링크를 연다", "tone": "direct", "send": false, "next": "p7_l_open", "effects": {"alert": 1, "flags": {"opened_sera_link": true}}}, {"text": "링크는 안 열고 캡처로 보여달라고 한다", "tone": "calm", "send": "링크는 안 열래요. 캡처로 보내 줘요.", "next": "p7_l_cap", "effects": {"affection": {"sera": 1}}}]},
-    {"id": "p7_l_open", "type": "msg", "speaker": "system", "text": "화면이 잠깐 깜빡였다. 아무 일도 없었다. …아마도.", "delay": 2200},
+    {"id": "p7_l_open", "type": "msg", "speaker": "system", "text": "화면이 잠깐 깜빡였다. 아무 일도 없었다, 아마도.", "delay": 2200},
     {"id": "p7_034", "type": "msg", "speaker": "sera", "text": "…열었네.", "delay": 975},
     {"id": "p7_035", "type": "msg", "speaker": "sera", "text": "신뢰의 신호로 받아들일게. 위험 신호이기도 하고.", "delay": 2185, "next": "p7_s_end"},
     {"id": "p7_l_cap", "type": "msg", "speaker": "sera", "text": "합리적이네.", "delay": 1030},

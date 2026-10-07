@@ -1,14 +1,15 @@
 // 대화방 목록. 대화 기록이 있거나 답장을 기다리는 방만 최근 순으로 보여 준다
 // (아직 연락이 없는 인물이 목록에 미리 드러나지 않게).
-// 알림 배너·목록 확장 기능은 M2-6.
+// 새 메시지 알림 배너는 banner.js (M2-6).
 
 import { h, createStatusbar } from './dom.js';
+import { menuButton } from './chat-view.js';
 
-export function createRoomList({ display, onOpen }) {
+export function createRoomList({ display, onOpen, onMenu }) {
   const status = createStatusbar();
   const ul = h('ul', { class: 'room-list' });
   const empty = h('p', { class: 'room-list__empty', hidden: true }, '아직 대화가 없습니다.');
-  const el = h('section', { class: 'screen', 'aria-label': '대화방 목록' }, status.el, h('header', { class: 'list-header' }, '채팅'), ul, empty);
+  const el = h('section', { class: 'screen', 'aria-label': '대화방 목록' }, status.el, h('header', { class: 'list-header' }, h('span', {}, '채팅'), menuButton(onMenu)), ul, empty);
 
   return {
     el,

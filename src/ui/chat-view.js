@@ -3,9 +3,14 @@
 
 import { h, createStatusbar } from './dom.js';
 
-const NEAR_BOTTOM = 80; // px. 이 안쪽이면 "맨 아래를 보고 있음"으로 본다
+const NEAR_BOTTOM = 80;
 
-export function createChatView({ display, onBack, onSkip }) {
+// 저장·불러오기 메뉴 버튼 (M2-7). onMenu가 없으면 만들지 않는다.
+export function menuButton(onMenu) {
+  return onMenu ? h('button', { class: 'icon-btn menu-btn', type: 'button', 'aria-label': '저장·불러오기', onclick: onMenu }, '☰') : null;
+} // px. 이 안쪽이면 "맨 아래를 보고 있음"으로 본다
+
+export function createChatView({ display, onBack, onSkip, onMenu }) {
   const status = createStatusbar();
   const avatarSlot = h('span', { class: 'chat-header__avatar' });
   const title = h('div', { class: 'chat-header__name' });
@@ -15,6 +20,7 @@ export function createChatView({ display, onBack, onSkip }) {
     h('button', { class: 'icon-btn', type: 'button', 'aria-label': '대화방 목록으로', onclick: onBack }, '‹'),
     avatarSlot,
     title,
+    menuButton(onMenu),
   );
   const list = h('div', { class: 'messages', role: 'log', 'aria-live': 'polite' });
   const newBtn = h('button', { class: 'new-msg', type: 'button', hidden: true, onclick: () => scrollToBottom() }, '새 메시지 ↓');

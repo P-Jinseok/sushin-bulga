@@ -37,7 +37,7 @@
     {"id": "p2_b_deny", "type": "msg", "speaker": "j", "text": "현명하세요.", "delay": 1030},
     {"id": "p2_029", "type": "msg", "speaker": "j", "text": "처음 보는 사람에게 말할 필요는 없어요.", "delay": 1910, "next": "p2_b_merge"},
     {"id": "p2_b_merge", "type": "msg", "speaker": "j", "text": "마지막으로 하나만요. 열쇠는 받으신 적 없죠?", "delay": 2075},
-    {"id": "p2_031", "type": "msg", "speaker": "dohha", "text": "열쇠요? 아니요. 아무것도 없는데요.", "delay": 900},
+    {"id": "p2_031", "type": "msg", "speaker": "dohha", "text": "열쇠요? 아니요, 아무것도 없는데요.", "delay": 900},
     {"id": "p2_032", "type": "msg", "speaker": "j", "text": "…그렇군요. 그럼 됐어요.", "delay": 1470},
     {"id": "p2_033", "type": "msg", "speaker": "j", "text": "내일 밤 11시, 이 번호로 누군가 연락해 올 거예요.", "delay": 2350},
     {"id": "p2_034", "type": "msg", "speaker": "j", "text": "받든 말든 자유지만, 누가 연락했는지는 기억해 두세요.", "delay": 2350},

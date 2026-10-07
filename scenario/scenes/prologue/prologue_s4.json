@@ -17,7 +17,7 @@
     {"id": "p4_r1_calm", "type": "msg", "speaker": "harin", "text": "…네?", "delay": 865},
     {"id": "p4_009", "type": "msg", "speaker": "harin", "text": "아… 죄송해요. 번호가 바뀐 줄은 알았는데, 이렇게 닿을 줄은 몰랐어요.", "delay": 2800, "next": "p4_after1"},
     {"id": "p4_r1_ask", "type": "msg", "speaker": "harin", "text": "…유진이를 아세요?", "delay": 1250},
-    {"id": "p4_011", "type": "msg", "speaker": "harin", "text": "아, 아니에요. 지금 그걸 물을 때가 아니죠. 너무 놀라서요.", "delay": 2600, "next": "p4_after1"},
+    {"id": "p4_011", "type": "msg", "speaker": "harin", "text": "아, 지금 그걸 물을 때가 아니죠. 너무 놀라서요.", "delay": 2600, "next": "p4_after1"},
     {"id": "p4_r1_who", "type": "msg", "speaker": "harin", "text": "아… 죄송해요. 번호가 바뀐 걸 알면서도 보냈어요.", "delay": 2400, "next": "p4_after1"},
     {"id": "p4_after1", "type": "msg", "speaker": "harin", "text": "저는 서하린이라고 해요. 유진이랑 같이 살던 친구예요.", "delay": 2400},
     {"id": "p4_014", "type": "contact", "target": "harin", "name": "서하린"},

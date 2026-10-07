@@ -17,7 +17,7 @@
     {"id": "p9_008", "type": "fx", "kind": "time_jump", "time": "22:52"},
     {"id": "p9_009", "type": "end_scene", "next": "harin_s1"},
     {"id": "p9_nayeon", "type": "fx", "kind": "time_jump", "time": "22:41"},
-    {"id": "p9_011", "type": "msg", "speaker": "nayeon", "text": "미쳤어? …됐어. 그 근처에서 움직이지 마.", "delay": 2020, "room": "nayeon"},
+    {"id": "p9_011", "type": "msg", "speaker": "nayeon", "text": "미쳤어? 됐어, 그 근처에서 움직이지 마.", "delay": 1965, "room": "nayeon"},
     {"id": "p9_012", "type": "msg", "speaker": "nayeon", "text": "10분 안에 간다. 아무한테도 말하지 말고.", "delay": 2020, "room": "nayeon"},
     {"id": "p9_013", "type": "msg", "speaker": "dohha", "text": "알겠어요.", "delay": 600, "room": "nayeon"},
     {"id": "p9_014", "type": "msg", "speaker": "nayeon", "text": "내가 도착하기 전에 다리 밑으로 내려가지 마.", "delay": 2075, "room": "nayeon"},

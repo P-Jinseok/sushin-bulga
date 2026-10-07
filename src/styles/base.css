@@ -83,7 +83,8 @@ summary,
 .app,
 .messages,
 .room-list,
-.choices {
+.choices,
+.sheet__panel {
   touch-action: manipulation;
 }
 
