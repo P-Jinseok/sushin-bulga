@@ -959,3 +959,58 @@ button:focus-visible {
 .choices > * {
   flex: none;
 }
+
+/* 갤러리 엔딩 문구 (지시서 #12) */
+.gallery__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gallery__sub {
+  margin-top: 2px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.gallery__hint {
+  font-style: italic;
+  letter-spacing: normal;
+}
+
+/* 해금된 J 항목과 해금 알림 (지시서 #14) */
+.title__special {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title__special .avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+}
+
+.title__special-name {
+  font-variant-numeric: tabular-nums;
+}
+
+.title__announce {
+  margin: 0 auto;
+  padding: 10px 16px;
+  max-width: 320px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line), 0 4px 16px rgb(0 0 0 / 0.15);
+  text-align: center;
+  font-weight: 700;
+  animation: banner-in 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title__announce {
+    animation: none;
+  }
+}

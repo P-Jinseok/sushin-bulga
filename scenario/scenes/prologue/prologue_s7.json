@@ -47,6 +47,6 @@
     {"id": "p7_s_end", "type": "msg", "speaker": "sera", "text": "오늘 밤 11시 얘기는 들었지? 청하천 3번 다리.", "delay": 2240},
     {"id": "p7_039", "type": "msg", "speaker": "sera", "text": "네가 가겠다면 막진 않아. 대신 혼자는 가지 마.", "delay": 2185},
     {"id": "p7_040", "type": "msg", "speaker": "sera", "text": "확인할 게 있으면 같이 가. 30분 전에 연락해.", "delay": 2185},
-    {"id": "p7_041", "type": "end_scene", "next": "prologue_s8"}
+    {"id": "p7_041", "type": "end_scene", "next": "prologue_s7b"}
   ]
 }

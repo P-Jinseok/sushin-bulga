@@ -25,6 +25,6 @@
     {"id": "p3_sleep", "type": "msg", "speaker": "system", "text": "불을 껐다. 하지만 문자 속 한 줄이 계속 떠올랐다.", "delay": 2200},
     {"id": "p3_017", "type": "msg", "speaker": "system", "text": "'그 열쇠는 아무한테도 보여주면 안 돼.'", "delay": 2000, "next": "p3_merge"},
     {"id": "p3_merge", "type": "msg", "speaker": "system", "text": "새벽 한 시가 넘어서야 겨우 잠들었다.", "delay": 2000},
-    {"id": "p3_019", "type": "end_scene", "next": "prologue_s4"}
+    {"id": "p3_019", "type": "end_scene", "next": "prologue_s3b"}
   ]
 }

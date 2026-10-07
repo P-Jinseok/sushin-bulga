@@ -1,0 +1,30 @@
+{
+  "sceneId": "prologue_s3b",
+  "title": "아침",
+  "route": "prologue",
+  "room": "j",
+  "time": "07:40",
+  "day": "화요일",
+  "start": "p3b_001",
+  "nodes": [
+    {"id": "p3b_001", "type": "fx", "kind": "time_jump", "time": "07:40", "day": "화요일"},
+    {"id": "p3b_002", "type": "msg", "speaker": "system", "text": "알람보다 먼저 눈이 떠졌다. 화면에는 어젯밤 대화가 그대로 남아 있다.", "delay": 2400},
+    {"id": "p3b_003", "type": "msg", "speaker": "system", "text": "통신사 앱을 열었다. 이 번호의 개통일은 어제 오후 6시.", "delay": 2200},
+    {"id": "p3b_004", "type": "msg", "speaker": "system", "text": "'재사용 번호입니다. 이전 사용자의 연락이 올 수 있습니다.'", "delay": 2400},
+    {"id": "p3b_005", "type": "msg", "speaker": "system", "text": "어제 처음 내 것이 된 번호. 그전엔 누군가의 것이었다.", "delay": 2200},
+    {"id": "p3b_006", "type": "choice", "timer": 0, "options": [{"text": "통신사에 이전 사용자를 문의한다", "tone": "direct", "send": false, "next": "p3b_a_ask"}, {"text": "J에게 다시 묻는다", "tone": "calm", "send": "J 씨, 오늘 밤 일은 정말 뭐예요?", "next": "p3b_a_j"}, {"text": "일단 출근 준비를 한다", "tone": "avoid", "send": false, "next": "p3b_a_go"}]},
+    {"id": "p3b_a_ask", "type": "msg", "speaker": "system", "text": "상담 챗봇: '개인정보 보호를 위해 이전 사용자 정보는 안내할 수 없습니다.'", "delay": 2600},
+    {"id": "p3b_008", "type": "msg", "speaker": "system", "text": "예상한 답이었다.", "delay": 1400, "next": "p3b_a_end"},
+    {"id": "p3b_a_j", "type": "fx", "kind": "typing", "room": "j", "duration": 2200},
+    {"id": "p3b_010", "type": "msg", "speaker": "j", "text": "…오늘 밤 11시예요. 이미 말씀드린 그대로요.", "delay": 2200},
+    {"id": "p3b_011", "type": "msg", "speaker": "j", "text": "정하지 못했다면 그때까지 정하세요.", "delay": 1800},
+    {"id": "p3b_012", "type": "msg", "speaker": "j", "text": "그리고 번호는 바꾸지 마세요.", "delay": 1600, "next": "p3b_a_end"},
+    {"id": "p3b_a_go", "type": "msg", "speaker": "system", "text": "답을 미룬 채 셔츠를 걸쳤다.", "delay": 1800},
+    {"id": "p3b_014", "type": "msg", "speaker": "system", "text": "'번호를 바꾸지 마세요.' 어젯밤 그 한 줄이 계속 걸린다.", "delay": 2400, "next": "p3b_a_end"},
+    {"id": "p3b_a_end", "type": "fx", "kind": "time_jump", "time": "08:50", "day": "화요일"},
+    {"id": "p3b_016", "type": "msg", "speaker": "system", "text": "출근길 지하철. 같은 칸 사람들이 전부 휴대폰을 보고 있다.", "delay": 2200},
+    {"id": "p3b_017", "type": "msg", "speaker": "system", "text": "내 휴대폰만 조용한 게 오히려 이상했다.", "delay": 2000},
+    {"id": "p3b_018", "type": "msg", "speaker": "system", "text": "그때 화면이 켜졌다.", "delay": 1500},
+    {"id": "p3b_019", "type": "end_scene", "next": "prologue_s4"}
+  ]
+}

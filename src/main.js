@@ -16,7 +16,7 @@
 
 import { createConfig } from './core/config.js';
 import { createState } from './core/state.js';
-import { createMeta, galleryModel } from './core/meta.js';
+import { createMeta, galleryModel, parseEndingCopy, isUnlocked } from './core/meta.js';
 import { createClock } from './core/clock.js';
 import { createRunner } from './core/runner.js';
 import { parseSceneId } from './core/ids.js';
@@ -29,11 +29,14 @@ import { createTitleScreen, createGalleryScreen } from './ui/screens.js';
 import { createDebugPanel } from './ui/debug-panel.js';
 import { readSettings, applySettings } from './ui/settings.js';
 import { parseStateSpec } from './core/qa-state.js';
+import { PUBLIC_BUILD } from './build-config.js';
+import { createAvatar } from './ui/avatar.js';
 
 const params = new URLSearchParams(location.search);
 const dataParam = params.get('data');
-// QA 장면 점프는 debug와 함께일 때만 (일반 주소의 scene 값은 무시)
-const qaJump = params.has('debug') && params.get('scene') ? params.get('scene') : null;
+// QA 장면 점프는 debug와 함께일 때만 (일반 주소의 scene 값은 무시). 공개 배포본에서는 끈다 (지시서 #14)
+const qaJump = !PUBLIC_BUILD && params.has('debug') && params.get('scene') ? params.get('scene') : null;
+const J_START = 'j_s1';
 
 function dataBase() {
   if (!dataParam) return 'scenario/';
@@ -93,6 +96,19 @@ async function main() {
   const { meta, status: metaStatus } = readMeta(createMeta, store);
   const toTitle = () => location.reload();
 
+  // 갤러리 엔딩 문구 (지시서 #12). 파일이 없거나 형식이 틀리면 기존 표시 그대로
+  let endingCopy = null;
+  try {
+    endingCopy = parseEndingCopy(await fetchJson('scenario/ending-copy.json'));
+  } catch {}
+  // 해금 전 J 엔딩 칸은 다른 칸과 구별되지 않게 hint도 숨긴다 (#05 "해금 전 J 엔딩은 ???로만")
+  const jCharacter = config.characters.get('j');
+  const gallery = () =>
+    galleryModel(meta, config, {
+      copy: endingCopy,
+      hintAllowed: (e) => e.route !== 'j' || !jCharacter || isUnlocked(jCharacter, { meta, config }),
+    });
+
   // 저장 요약: 게임 속 요일·시각 + 마지막 대화 상대(저장 당시 표시 이름) + 실제 저장 시각
   const nameIn = (state, id) => {
     const c = config.characters.get(id);
@@ -138,23 +154,41 @@ async function main() {
     const notices = [];
     if (!canStore) notices.push('이 브라우저에서는 저장할 수 없습니다 (사생활 보호 모드 등). 새로고침하면 처음부터 시작합니다.');
     if (META_NOTICE[metaStatus]) notices.push(META_NOTICE[metaStatus]);
+
+    // J 루트 진입 (지시서 #14): 해금 전에는 항목 자체를 만들지 않는다. 표시는 번호(displayName)와 글리치 프로필(default)
+    const jUnlocked = !!jCharacter && isUnlocked(jCharacter, { meta, config });
+    const special = jUnlocked
+      ? { avatar: createAvatar(jCharacter, { variant: 'default', size: 'sm' }), name: jCharacter.displayName ?? jCharacter.name, onStart: () => startGame(null, { sceneId: J_START }) }
+      : null;
+    // 해금 후 처음 타이틀에 왔을 때 한 번만 알린다 (본 기록은 meta에 저장)
+    let announce = null;
+    if (jUnlocked && !meta.notices?.jUnlock) {
+      announce = '새로운 연락이 도착했습니다';
+      meta.notices = { ...(meta.notices ?? {}), jUnlock: true };
+      writeMeta(meta, store);
+    }
+
     const title = createTitleScreen({
       autoText: auto.ok ? describe(auto.save) : null,
       notices,
+      special,
+      announce,
       onStart: () => startGame(null),
       onContinue: () => startGame(auto.save),
       onLoad: () => sheet.open({ loadOnly: true }),
-      onGallery: () => app.replaceChildren(createGalleryScreen(galleryModel(meta, config), { onBack: showTitle }), sheet.el),
+      onGallery: () => app.replaceChildren(createGalleryScreen(gallery(), { onBack: showTitle }), sheet.el),
     });
     app.replaceChildren(title, sheet.el);
     title.querySelector('button')?.focus();
   }
 
   // ── 게임 시작 (save가 없으면 처음부터)
+  // jump(선택): { sceneId, spec? } — 새 상태로 그 장면부터. spec이 있으면 QA 점프(수치·플래그 지정, 안내 표시)
+  //   J 루트 진입은 { sceneId: 'j_s1' } (이전 판의 수치를 이어받지 않음)
   async function startGame(save, jump = null) {
     sheet.close();
     const state = save ? save.state : createState(config);
-    if (jump) jump.spec.apply(state);
+    if (jump?.spec) jump.spec.apply(state);
     const clock = createClock();
     const speed = Number(params.get('speed'));
     if (speed > 0) clock.setSpeed(speed);
@@ -169,7 +203,7 @@ async function main() {
       onTitle: toTitle,
       onChange: () => debug?.update(),
       onMenu: () => sheet.open(),
-      getGallery: () => galleryModel(meta, config),
+      getGallery: gallery, // 엔딩 화면은 달성 수만 쓴다 (summary는 엔딩 화면에 표시하지 않음)
     });
     app.append(sheet.el);
     if (params.has('debug')) {
@@ -179,7 +213,7 @@ async function main() {
 
     // 불러오기: 저장된 기록으로 대화방을 다시 만든 뒤, 저장 위치부터 진행
     const notices = [];
-    if (jump) {
+    if (jump?.spec) {
       notices.push(`QA 점프: ${jump.sceneId}부터${jump.spec.summary ? ` (${jump.spec.summary})` : ''}. 저장은 QA 전용 영역에 따로 됩니다.`);
       for (const e of jump.spec.errors) notices.push(`QA 상태 지정 오류: ${e}`);
     }

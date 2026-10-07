@@ -1,0 +1,32 @@
+{
+  "sceneId": "chaerin_s4",
+  "title": "아침의 결정",
+  "route": "chaerin",
+  "room": "chaerin",
+  "time": "08:00",
+  "day": "수요일",
+  "start": "c4_001",
+  "nodes": [
+    {"id": "c4_001", "type": "fx", "kind": "time_jump", "time": "08:00", "day": "수요일"},
+    {"id": "c4_002", "type": "fx", "kind": "notify", "text": "선배 잠 못 잤죠?"},
+    {"id": "c4_003", "type": "msg", "speaker": "chaerin", "text": "선배 잠 못 잤죠? 저도요 ㅎㅎ", "delay": 1900},
+    {"id": "c4_004", "type": "msg", "speaker": "chaerin", "text": "아침 되니까 좀 괜찮아졌어요~", "delay": 1900},
+    {"id": "c4_005", "type": "msg", "speaker": "chaerin", "text": "쪽지 봤죠ㅠㅠ", "delay": 1600},
+    {"id": "c4_006", "type": "msg", "speaker": "chaerin", "text": "이제 열쇠는 제 가방에만 있는 게 아니에요.", "delay": 2400, "lintIgnore": ["voice"]},
+    {"id": "c4_007", "type": "msg", "speaker": "chaerin", "text": "누가 알고 있어요.", "delay": 1800, "lintIgnore": ["voice"]},
+    {"id": "c4_008", "type": "msg", "speaker": "chaerin", "text": "어떡하면 좋을까요 선배ㅠㅠ", "delay": 2200},
+    {"id": "c4_009", "type": "choice", "timer": 0, "options": [{"text": "열쇠는 제가 맡을게요. 같이 지켜요.", "tone": "calm", "send": "열쇠는 제가 맡을게요. 이제 혼자 들고 있지 않아도 돼요.", "next": "c4_g_keyhand", "effects": {"affection": {"chaerin": 1}, "flags": {"decision_keyhand": true}}}, {"text": "안전한 곳에 숨기고 아무한테도 말하지 말아요.", "tone": "calm", "next": "c4_g_hide", "effects": {"flags": {"decision_hide": true}}}, {"text": "이제는 경찰에 말해야 해요.", "tone": "direct", "next": "c4_g_police", "effects": {"affection": {"chaerin": -1}, "flags": {"decision_police": true}}}]},
+    {"id": "c4_g_keyhand", "type": "msg", "speaker": "chaerin", "text": "…선배가요?", "delay": 1700},
+    {"id": "c4_011", "type": "msg", "speaker": "chaerin", "text": "저 지금 울 것 같아요ㅠㅠ", "delay": 2000},
+    {"id": "c4_012", "type": "msg", "speaker": "chaerin", "text": "1년 동안 아무한테도 못 줬거든요~", "delay": 2200},
+    {"id": "c4_013", "type": "msg", "speaker": "chaerin", "text": "이따 만나서 줄게요. 약속이에요 ㅎㅎ", "delay": 2200, "next": "c4_g_end"},
+    {"id": "c4_g_hide", "type": "msg", "speaker": "chaerin", "text": "…네. 그게 제일 안전하겠죠?", "delay": 2000},
+    {"id": "c4_015", "type": "msg", "speaker": "chaerin", "text": "혼자 갖고 있을게요 ㅎㅎ", "delay": 1700},
+    {"id": "c4_016", "type": "msg", "speaker": "chaerin", "text": "괜찮아요~ 저 원래 잘 숨겨요ㅠㅠ", "delay": 2000, "next": "c4_g_end"},
+    {"id": "c4_g_police", "type": "msg", "speaker": "chaerin", "text": "…", "delay": 2200},
+    {"id": "c4_018", "type": "msg", "speaker": "chaerin", "text": "안 된다고 했잖아요ㅠㅠ", "delay": 1800},
+    {"id": "c4_019", "type": "msg", "speaker": "chaerin", "text": "선배가 그러면 저는 누굴 믿어요~", "delay": 2200},
+    {"id": "c4_020", "type": "msg", "speaker": "chaerin", "text": "죄송해요. 오늘은 그만 이야기할게요ㅠㅠ", "delay": 2200, "next": "c4_g_end"},
+    {"id": "c4_g_end", "type": "end_scene", "next": "chaerin_s5"}
+  ]
+}

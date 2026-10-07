@@ -1,0 +1,32 @@
+{
+  "sceneId": "sera_s3",
+  "title": "교환",
+  "route": "sera",
+  "room": "sera",
+  "time": "02:10",
+  "day": "수요일",
+  "start": "se3_001",
+  "nodes": [
+    {"id": "se3_001", "type": "fx", "kind": "time_jump", "time": "02:10", "day": "수요일"},
+    {"id": "se3_002", "type": "msg", "speaker": "sera", "text": "사본 정리 끝났다. 네 쪽 먼저 받는다.", "delay": 1900},
+    {"id": "se3_003", "type": "msg", "speaker": "dohha", "text": "보냈어요. 지금까지 받은 문자 전부예요.", "delay": 940, "room": "sera"},
+    {"id": "se3_004", "type": "msg", "speaker": "sera", "text": "수신 확인.", "delay": 1200},
+    {"id": "se3_005", "type": "msg", "speaker": "sera", "text": "내 쪽 로그도 준다. 암호화 파일 하나야.", "delay": 1900},
+    {"id": "se3_006", "type": "msg", "speaker": "system", "text": "파일이 도착했다. 열쇠 모양 아이콘이 붙어 있다.", "delay": 2200},
+    {"id": "se3_007", "type": "msg", "speaker": "sera", "text": "하나 말해 둔다.", "delay": 1300},
+    {"id": "se3_008", "type": "msg", "speaker": "sera", "text": "그 로그에 거짓 한 줄을 넣었다.", "delay": 1800},
+    {"id": "se3_009", "type": "msg", "speaker": "sera", "text": "네가 그걸 밖에 흘리면, 누가 샜는지 알게 돼.", "delay": 2300},
+    {"id": "se3_010", "type": "msg", "speaker": "sera", "text": "거래에서는 이런 장치가 기본이야.", "delay": 1900},
+    {"id": "se3_011", "type": "choice", "timer": 0, "options": [{"text": "믿음을 시험하셨네요. 기분은 안 좋아요.", "tone": "direct", "next": "se3_h_mad"}, {"text": "합리적이네요. 저라도 그랬을 거예요.", "tone": "calm", "next": "se3_h_agree", "effects": {"affection": {"sera": 1}}}, {"text": "그럼 세라 씨 쪽 파일에도 거짓이 있어요?", "tone": "direct", "next": "se3_h_ask", "effects": {"clue": 1, "flags": {"clue_sera_3": true}}}]},
+    {"id": "se3_h_mad", "type": "msg", "speaker": "sera", "text": "기분은 근거가 아니야.", "delay": 1500},
+    {"id": "se3_013", "type": "msg", "speaker": "sera", "text": "하지만 말해 준 건 공정하다는 뜻이야.", "delay": 2000, "next": "se3_h_end"},
+    {"id": "se3_h_agree", "type": "msg", "speaker": "sera", "text": "이해가 빠르네.", "delay": 1300},
+    {"id": "se3_015", "type": "msg", "speaker": "sera", "text": "그런 사람이랑은 거래가 편해.", "delay": 1700, "next": "se3_h_end"},
+    {"id": "se3_h_ask", "type": "msg", "speaker": "sera", "text": "…있어.", "delay": 1300},
+    {"id": "se3_017", "type": "msg", "speaker": "sera", "text": "두 줄. 하나는 시각, 하나는 장소야.", "delay": 2000},
+    {"id": "se3_018", "type": "msg", "speaker": "sera", "text": "찾아내면 네가 나를 믿어도 되는 근거가 생겨.", "delay": 2200, "next": "se3_h_end"},
+    {"id": "se3_h_end", "type": "msg", "speaker": "sera", "text": "잠깐 자. 6시 반에 이어서 이야기한다.", "delay": 1900},
+    {"id": "se3_020", "type": "msg", "speaker": "dohha", "text": "알겠어요.", "delay": 600},
+    {"id": "se3_021", "type": "end_scene", "next": "sera_s4"}
+  ]
+}

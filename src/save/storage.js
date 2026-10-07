@@ -67,7 +67,7 @@ export function summarize(state) {
   return { day: state.clock?.day ?? null, time: state.clock?.time ?? null, room: last?.room ?? null };
 }
 
-// ── meta (M2-8): 본 엔딩 ID 목록. 저장 슬롯과 별개로 영구 유지하고, "처음부터"로도 지우지 않는다.
+// ── meta (M2-8): 본 엔딩 ID 목록 (+ 지시서 #14: 한 번만 보여 준 안내 기록 notices). 저장 슬롯과 별개로 영구 유지하고, "처음부터"로도 지우지 않는다.
 // 읽을 수 없거나 버전이 다르면 원본을 META_BACKUP_KEY에 옮겨 두고 빈 기록으로 시작한다 (기록을 조용히 잃지 않게).
 
 export const META_KEY = 'mvn.meta';
@@ -89,7 +89,10 @@ export function readMeta(createEmpty, storage = defaultStorage()) {
   } catch {}
   const valid = data && Array.isArray(data.seenEndings) && data.seenEndings.every((x) => typeof x === 'string');
   const status = !valid ? 'corrupt' : data.version !== META_SAVE_VERSION ? 'version' : 'ok';
-  if (status === 'ok') return { meta: { ...createEmpty(), seenEndings: [...data.seenEndings] }, status };
+  if (status === 'ok') {
+    const notices = data.notices && typeof data.notices === 'object' && !Array.isArray(data.notices) ? { ...data.notices } : {};
+    return { meta: { ...createEmpty(), seenEndings: [...data.seenEndings], notices }, status };
+  }
   try {
     storage.setItem(META_BACKUP_KEY, raw);
   } catch {}
@@ -98,7 +101,9 @@ export function readMeta(createEmpty, storage = defaultStorage()) {
 
 export function writeMeta(meta, storage = defaultStorage()) {
   try {
-    storage.setItem(META_KEY, JSON.stringify({ version: META_SAVE_VERSION, seenEndings: meta.seenEndings }));
+    // notices(한 번만 보여 준 안내 기록, 예: J 해금 알림)는 있을 때만 쓴다
+    const notices = meta.notices && Object.keys(meta.notices).length ? { notices: meta.notices } : {};
+    storage.setItem(META_KEY, JSON.stringify({ version: META_SAVE_VERSION, seenEndings: meta.seenEndings, ...notices }));
     return true;
   } catch {
     return false;
