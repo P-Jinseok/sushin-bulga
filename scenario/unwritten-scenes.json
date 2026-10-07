@@ -1,4 +1,0 @@
-{
-  "_note": "아직 집필하지 않아 존재하지 않는 장면 ID. lint --allow-unwritten 사용 시 이 장면을 가리키는 end_scene은 경고로 낮춘다. 장면을 쓰면 목록에서 지운다.",
-  "scenes": ["harin_s1", "nayeon_s1", "chaerin_s1", "sera_s1"]
-}

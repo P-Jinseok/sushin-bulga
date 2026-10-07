@@ -24,12 +24,14 @@ export function createTitleScreen({ autoText, notices = [], onStart, onContinue,
       },
     }, '처음부터');
   function renderMenu() {
-    menu.replaceChildren(
+    // replaceChildren은 null을 "null" 글자로 넣으므로 빈 항목은 걸러 낸다
+    const items = [
       autoText ? h('button', { class: 'choice title__continue', type: 'button', onclick: onContinue }, '이어하기', h('span', { class: 'choice__hint' }, autoText)) : null,
       startButton(),
       h('button', { class: 'choice', type: 'button', onclick: onLoad }, '불러오기'),
       h('button', { class: 'choice', type: 'button', onclick: onGallery }, '엔딩 갤러리'),
-    );
+    ];
+    menu.replaceChildren(...items.filter(Boolean));
   }
   renderMenu();
   return h(
