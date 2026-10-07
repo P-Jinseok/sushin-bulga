@@ -29,7 +29,7 @@ export function createRoomList({ display, onOpen, onMenu }) {
               'button',
               { class: 'room', type: 'button', onclick: () => onOpen(r.id) },
               display.avatar(r.id),
-              h('span', { class: 'room__body' }, h('div', { class: 'room__name' }, display.name(r.id)), h('div', { class: 'room__last' }, preview)),
+              h('span', { class: 'room__body' }, h('div', { class: 'room__name', 'data-room': r.id }, display.name(r.id)), h('div', { class: 'room__last' }, preview)),
               h(
                 'span',
                 { class: 'room__meta' },

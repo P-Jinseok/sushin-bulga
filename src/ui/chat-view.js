@@ -30,6 +30,7 @@ export function createChatView({ display, onBack, onSkip, onMenu }) {
   const parts = new WeakMap(); // item → { side, bubble }
   let roomId = null;
   let lastItem = null;
+  let lastDay = null; // 마지막으로 그린 날짜 구분선 (메시지 또는 fx time_jump)
   let typingEl = null;
 
   // 화면 탭 = 현재 대기 건너뛰기 (스크롤은 click을 만들지 않으므로 방해하지 않음)
@@ -82,19 +83,25 @@ export function createChatView({ display, onBack, onSkip, onMenu }) {
     const e = item.entry;
     const marks = [];
     if (item.kind === 'me') {
-      if (e.failed) marks.push(h('span', { class: 'send-fail', title: '전송 실패' }, '!'));
+      if (e.failed) marks.push(h('span', { class: 'send-fail', title: '전송 실패', 'aria-label': '전송 실패' }, '!'));
       else if (e.read === false) marks.push(h('span', { class: 'unread', 'aria-label': '안 읽음' }, '1'));
     }
     if (item.time) marks.push(h('span', {}, item.time));
     p.side.replaceChildren(...marks);
+    p.bubble.classList.toggle('bubble--failed', !!e.failed);
     if (e.deleted) {
       p.bubble.textContent = '삭제된 메시지입니다';
       p.bubble.classList.add('bubble--deleted');
     }
   }
 
+  function insertDay(day) {
+    list.insertBefore(h('div', { class: 'day-divider', role: 'separator' }, day), typingEl);
+    lastDay = day;
+  }
+
   function appendItem(item) {
-    if (item.day && item.day !== lastItem?.day) list.insertBefore(h('div', { class: 'day-divider', role: 'separator' }, item.day), typingEl);
+    if (item.day && item.day !== lastDay) insertDay(item.day);
     list.insertBefore(renderItem(item, lastItem), typingEl);
     lastItem = item;
   }
@@ -114,6 +121,7 @@ export function createChatView({ display, onBack, onSkip, onMenu }) {
       title.textContent = display.name(room.id);
       list.replaceChildren();
       lastItem = null;
+      lastDay = null;
       typingEl = null;
       for (const item of room.items) appendItem(item);
       this.setTyping(room.typing);
@@ -157,5 +165,20 @@ export function createChatView({ display, onBack, onSkip, onMenu }) {
     },
 
     scrollToBottom,
+
+    // fx time_jump: 날짜가 바뀌면 메시지를 기다리지 않고 바로 구분선을 넣는다
+    showDay(day) {
+      if (day && day !== lastDay) withAutoScroll(() => insertDay(day), { notify: false });
+    },
+
+    // fx glitch 대상
+    get nameEl() {
+      return title;
+    },
+    bubbleOf(room, nodeId) {
+      if (room.id !== roomId) return null;
+      const item = room.items.find((i) => i.entry.nodeId === nodeId);
+      return item ? parts.get(item)?.bubble ?? null : null;
+    },
   };
 }

@@ -159,9 +159,31 @@ export function createRunner({ loadScene, presenter, clock, config, state, meta 
     return null;
   }
 
+  // node 다음부터 system 메시지만 이어지다 ending에 닿으면 true
+  function leadsToEnding(node) {
+    let cur = node;
+    for (let steps = 0; steps < 50; steps++) {
+      let next;
+      try {
+        next = nodeById(implicitNext(cur));
+      } catch {
+        return false;
+      }
+      if (next.type === 'ending') return true;
+      if (next.type !== 'msg' || next.speaker !== config.systemId) return false;
+      cur = next;
+    }
+    return false;
+  }
+
   async function runFx(node) {
     const room = roomOf(node);
-    const shown = Promise.resolve(call('fx', { node, room }));
+    // 다음 노드 종류와, 시스템 문구만 거쳐 엔딩에 닿는지 알려 준다 (엔딩 직전 암전 유지, DEC-053·DEC-057)
+    let nextType = null;
+    try {
+      nextType = nodeById(implicitNext(node)).type;
+    } catch {}
+    const shown = Promise.resolve(call('fx', { node, room, nextType, leadsToEnding: leadsToEnding(node) }));
     const work = (async () => {
       switch (node.kind) {
         case 'read': {
@@ -175,6 +197,9 @@ export function createRunner({ loadScene, presenter, clock, config, state, meta 
         case 'time_jump':
           if (node.time) state.clock.time = node.time;
           if (node.day) state.clock.day = node.day;
+          break;
+        case 'battery': // 상단 배터리 표시 (0~100). 세이브에 포함
+          state.battery = Math.min(100, Math.max(0, Number(node.level) || 0));
           break;
         case 'delete_msg': {
           const e = findEntry(scene.sceneId, node.target);
@@ -214,6 +239,7 @@ export function createRunner({ loadScene, presenter, clock, config, state, meta 
     for (;;) {
       state.position = { sceneId: scene.sceneId, nodeId: id };
       const node = nodeById(id);
+      hooks.onNode?.(scene.sceneId, node.id); // 도구용 (분기 탐색의 노드 도달 확인)
       const instant = ['cond', 'switch', 'effect'].includes(node.type);
       instantSteps = instant ? instantSteps + 1 : 0;
       if (instantSteps > INSTANT_LIMIT) throw new Error(`${scene.sceneId} / ${node.id}: 대기 없는 노드가 계속 반복됨 (무한 루프 의심)`);

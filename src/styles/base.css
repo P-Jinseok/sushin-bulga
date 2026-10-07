@@ -5,14 +5,16 @@
   --surface: #ffffff;
   --surface-2: #e9ebef;
   --text: #16181d;
-  --text-dim: #6b7280;
+  --text-dim: #5f6672; /* 대비 4.5:1 이상 (밝은 배경 5.2:1) */
   --line: #d9dce1;
   --accent: #4a6fa5;
   --bubble-me: #4a6fa5;
   --bubble-me-text: #ffffff;
   --bubble-other: #ffffff;
   --bubble-other-text: #16181d;
-  --danger: #d64545;
+  --danger: #c53030; /* 글자용, 대비 4.5:1 이상 */
+  --danger-strong: #c53030; /* 흰 글자를 올리는 배경용 (두 테마 공통) */
+  --unread: #8a6100; /* 안 읽음 1 (밝은 배경 5.0:1) */
   --outside: #c9ccd2;
 
   --fs: 15px; /* 글자 크기 설정(3단계)은 이 값을 바꾼다 */
@@ -32,6 +34,8 @@
     --surface-2: #20242c;
     --text: #e8eaee;
     --text-dim: #9aa1ad;
+    --danger: #f07070; /* 어두운 배경에서 글자 대비 6:1 */
+    --unread: #e0a800; /* 어두운 배경 8.8:1 */
     --line: #2a2f38;
     --bubble-other: #232831;
     --bubble-other-text: #e8eaee;

@@ -4,6 +4,7 @@
 // - 열려 있는 동안 게임 시계를 멈춘다 (onOpen/onClose에서 main이 처리).
 
 import { h } from './dom.js';
+import { createTextSizeControl } from './settings.js';
 
 const REASON_TEXT = { none: '비어 있음', corrupt: '읽을 수 없는 저장', version: '이전 버전 저장 (사용 불가)', unavailable: '저장소를 쓸 수 없음' };
 
@@ -17,6 +18,7 @@ export function createSaveSheet({ getEntries, describe, canSave, onSave, onLoad,
     h('div', { class: 'sheet__head' }, h('span', {}, '저장·불러오기'), h('button', { class: 'icon-btn', type: 'button', 'aria-label': '닫기', onclick: () => close() }, '✕')),
     list,
     note,
+    h('div', { class: 'sheet__settings' }, createTextSizeControl()),
   );
   const el = h('div', { class: 'sheet', hidden: true, onclick: (e) => e.target === el && close() }, panel);
   let loadOnly = false; // 타이틀에서 열면 불러오기만

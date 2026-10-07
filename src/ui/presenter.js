@@ -17,8 +17,10 @@ import { createRoomList } from './room-list.js';
 import { createChoiceView } from './choice-view.js';
 import { createBanner } from './banner.js';
 import { createEndingScreen } from './screens.js';
+import { createFx } from './fx.js';
 
-const STATE_FX = new Set(['delete_msg', 'send_fail', 'time_jump']);
+const TITLE_DROP_HOLD_MS = 1500;
+const STATE_FX = new Set(['delete_msg', 'send_fail', 'time_jump', 'battery']);
 const BRANCH = new Set(['choice', 'cond', 'switch', 'ending', 'end_scene']);
 
 // 장면 시작 노드부터 첫 msg 전에 notify가 있는지 (time_jump 등 다른 노드는 건너뛰며 판단, DEC-045)
@@ -71,10 +73,33 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
   const show = (screen) => host.replaceChildren(screen);
 
   function refreshStatus() {
-    const t = getState().clock.time;
-    chat.status.update(t);
-    list.status.update(t);
+    const { clock: c, battery = 100 } = getState();
+    chat.status.update(c.time, battery);
+    list.status.update(c.time, battery);
   }
+
+  // 연출 fx (M2-9). 대상 요소는 지금 보고 있는 화면에서 찾는다
+  const fx = createFx({
+    clock,
+    hooks: {
+      frame: app,
+      nameElFor: (room) => (current === room ? chat.nameEl : current === null ? list.el.querySelector(`.room__name[data-room="${room}"]`) : null),
+      setTyping: (room, speaker) => {
+        roomOf(room).typing = speaker;
+        if (room === current) chat.setTyping(speaker);
+      },
+      showDay: (room, day) => {
+        if (room === current) chat.showDay(day);
+      },
+      glitchBubble: (nodeId, during) => {
+        const el = current !== null ? chat.bubbleOf(roomOf(current), nodeId) : null;
+        if (!el) return during();
+        el.classList.add('fx-glitch-bubble');
+        return during().then(() => el.classList.remove('fx-glitch-bubble'));
+      },
+      statusChanged: () => refreshStatus(),
+    },
+  });
 
   function renderList() {
     list.render([...rooms.values()], pending?.room ?? null);
@@ -159,6 +184,7 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
       const item = { entry, speaker, text, time: entry.time ?? null, day: entry.day ?? null, kind: kindOf(speaker) };
       r.items.push(item);
       r.seq = entry.seq ?? r.seq + 1;
+      if (item.kind === 'system') fx.titleDrop(text); // 엔딩 직전 암전 중이면 문구를 암전 위에 (대화 기록에도 남음)
       if (room === deferredRoom) openRoom(room); // 미뤄 둔 방은 첫 메시지가 오면 연다 (방금 넣은 메시지까지 그려짐)
       else if (room === current) chat.append(item);
       else if (item.kind === 'other') {
@@ -191,13 +217,14 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
       });
     },
 
-    fx({ node, room }) {
+    fx({ node, room, nextType, leadsToEnding }) {
       if (node.kind === 'notify') {
         banner.show({ room, text: node.text });
         return;
       }
-      // 그 밖의 연출 렌더링은 M2-9. 여기서는 core가 바꾼 상태(삭제·전송 실패·시각)만 화면에 반영한다.
-      if (!STATE_FX.has(node.kind)) return;
+      const shown = fx.run(node, room, { nextType, leadsToEnding });
+      // core가 바꾼 상태(삭제·전송 실패·시각·배터리)를 화면에 반영 (상태 변경은 이 호출 직후 동기로 일어남)
+      if (!STATE_FX.has(node.kind)) return shown;
       queueMicrotask(() => {
         const r = current !== null ? rooms.get(current) : null;
         if (r) chat.refreshMarkers(r);
@@ -205,6 +232,7 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
         refreshStatus();
         onChange?.();
       });
+      return shown;
     },
 
     contact() {
@@ -220,9 +248,14 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
       choices.clear();
       const { seen, total } = getGallery();
       const screen = createEndingScreen({ endingId, ending, isNew, seen, total, onTitle });
-      app.append(screen);
-      screen.querySelector('button')?.focus();
-      onChange?.();
+      const show = () => {
+        app.append(screen);
+        screen.querySelector('button')?.focus();
+        onChange?.();
+      };
+      // 암전 위 문구(타이틀 드롭)가 있으면 읽을 시간을 두고 엔딩 카드를 띄운다 (DEC-057)
+      if (fx.hasTitleDrop) setTimeout(show, TITLE_DROP_HOLD_MS);
+      else show();
     },
 
     // 진행을 멈추고 안내한다. kind: 'stop'(아직 없는 장면 등, 정상 종료에 가까움) | 'error' | 'info'(진행은 계속)

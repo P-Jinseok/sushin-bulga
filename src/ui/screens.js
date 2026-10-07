@@ -3,6 +3,7 @@
 // 못 본 엔딩의 제목·유형·ID를 아예 담지 않으므로 여기서도 쓸 수 없다.
 
 import { h } from './dom.js';
+import { createTextSizeControl } from './settings.js';
 
 export const TYPE_LABEL = { good: '굿 엔딩', normal: '노멀 엔딩', bad: '배드 엔딩', true: '트루 엔딩' };
 
@@ -40,6 +41,9 @@ export function createTitleScreen({ autoText, notices = [], onStart, onContinue,
     h('div', { class: 'title__head' }, h('h1', { class: 'title__name' }, '수신 불가'), h('p', { class: 'title__sub' }, '(가제)')),
     menu,
     notices.length ? h('div', { class: 'title__notices' }, notices.map((n) => h('p', {}, n))) : null,
+    // 저장소 삭제 위험 안내 (DEC-051)
+    h('div', { class: 'title__settings' }, createTextSizeControl()),
+    h('p', { class: 'title__storage' }, '이 브라우저에 저장됩니다. 오래 접속하지 않으면 기록이 지워질 수 있어요'),
   );
 }
 
@@ -61,7 +65,7 @@ export function createGalleryScreen(model, { onBack }) {
   );
 }
 
-// 엔딩 화면 (대화방 위에 겹쳐 표시). isNew면 "새 엔딩" 표시.
+// 엔딩 화면 (대화방 위에 겹쳐 표시). 제목·종류만, isNew면 "새 엔딩" 표시.
 export function createEndingScreen({ endingId, ending, isNew, seen, total, onTitle }) {
   const el = h(
     'div',
@@ -70,8 +74,9 @@ export function createEndingScreen({ endingId, ending, isNew, seen, total, onTit
       'div',
       { class: 'ending-screen__card' },
       h('p', { class: 'ending-screen__type' }, TYPE_LABEL[ending?.type] ?? '엔딩'),
-      h('h2', { class: 'ending-screen__title' }, ending?.title ?? endingId),
-      h('p', { class: 'ending-screen__meta' }, `엔딩 ${endingId}`, isNew ? h('span', { class: 'ending-screen__new' }, '새 엔딩') : null),
+      h('h2', { class: 'ending-screen__title' }, ending?.title ?? '엔딩'),
+      // 엔딩 ID는 표시하지 않는다 (ID 접두어로 루트를 짐작할 수 있음, DEC-050)
+      isNew ? h('p', { class: 'ending-screen__meta' }, h('span', { class: 'ending-screen__new' }, '새 엔딩')) : null,
       h('p', { class: 'ending-screen__count' }, `엔딩 갤러리 ${seen} / ${total}`),
       h('button', { class: 'choice', type: 'button', onclick: onTitle }, '타이틀로'),
     ),

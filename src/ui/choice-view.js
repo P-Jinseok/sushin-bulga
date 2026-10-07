@@ -44,12 +44,20 @@ export function createChoiceView(area) {
       );
 
       if (view.timer > 0) {
+        // 막대 + 남은 초. 선택지가 많아 이 영역이 스크롤되어도 위에 붙어 있고, 줄어들어 사라지지 않는다 (DEC-058 조사)
         const fill = h('div', { class: 'timer-bar__fill' });
-        area.append(h('div', { class: 'timer-bar', role: 'timer', 'aria-label': `제한시간 ${view.timer}초` }, fill));
+        const label = h('span', { class: 'timer-bar__label' }, `남은 시간 ${view.timer}초`);
+        area.append(h('div', { class: 'timer', role: 'timer', 'aria-label': `제한시간 ${view.timer}초` }, h('div', { class: 'timer-bar' }, fill), label));
         // 막대는 clock의 남은 시간을 그대로 그린다 (탭 전환·잠금 중에는 clock이 멈추므로 막대도 멈춤)
+        let lastSec = -1;
         const tick = () => {
           const m = view.meter;
-          if (m?.remaining && m.total) fill.style.width = `${(100 * m.remaining()) / m.total}%`;
+          if (m?.remaining && m.total) {
+            const left = m.remaining();
+            fill.style.width = `${(100 * left) / m.total}%`;
+            const sec = Math.ceil(left / 1000);
+            if (sec !== lastSec) label.textContent = `남은 시간 ${(lastSec = sec)}초`;
+          }
           raf = requestAnimationFrame(tick);
         };
         tick();

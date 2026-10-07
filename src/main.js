@@ -2,10 +2,12 @@
 //
 // URL 옵션 (개발·검증용):
 //   ?data=_test/engine   장면 폴더를 scenario/_test/engine/ 으로 (기본: scenario/, 프롤로그)
-//   ?scene=prologue_s1   새로 시작할 때의 첫 장면 (기본: prologue_s1)
 //   ?new=1               타이틀을 건너뛰고 바로 처음부터
 //   ?speed=2             텍스트 속도 배수 (기본 1)
 //   ?debug=1             수치 확인 패널
+//   ?debug=1&scene=prologue_s8&state=affection.harin:5,clue_harin_1
+//                        QA 전용 장면 점프 (DEC-059). 타이틀 없이 그 장면부터, 수치·플래그 지정.
+//                        저장은 [qa] 영역에 따로 해 실제 이어하기·엔딩 기록을 건드리지 않는다. debug 없이는 동작하지 않음
 //   ?mock=1              M2-1 화면 목업
 //
 // 저장(M2-7): 자동 저장은 장면 진입·선택 직후(DEC-017, DEC-025). 슬롯 3개.
@@ -25,9 +27,13 @@ import { createPresenter } from './ui/presenter.js';
 import { createSaveSheet } from './ui/save-sheet.js';
 import { createTitleScreen, createGalleryScreen } from './ui/screens.js';
 import { createDebugPanel } from './ui/debug-panel.js';
+import { readSettings, applySettings } from './ui/settings.js';
+import { parseStateSpec } from './core/qa-state.js';
 
 const params = new URLSearchParams(location.search);
 const dataParam = params.get('data');
+// QA 장면 점프는 debug와 함께일 때만 (일반 주소의 scene 값은 무시)
+const qaJump = params.has('debug') && params.get('scene') ? params.get('scene') : null;
 
 function dataBase() {
   if (!dataParam) return 'scenario/';
@@ -37,7 +43,7 @@ function dataBase() {
 
 // localStorage에 data 폴더별 접두어를 붙인다 (기본 데이터는 접두어 없음)
 function scopedStorage() {
-  const prefix = dataParam ? `[${dataParam}]` : '';
+  const prefix = (qaJump ? '[qa]' : '') + (dataParam ? `[${dataParam}]` : '');
   const ls = () => globalThis.localStorage; // 접근 자체가 예외인 브라우저가 있어 매번 꺼낸다 (storage.js가 예외 처리)
   return {
     getItem: (k) => ls().getItem(prefix + k),
@@ -71,6 +77,7 @@ const META_NOTICE = {
 
 async function main() {
   const app = document.getElementById('app');
+  applySettings(readSettings()); // 글자 크기 (M2-10)
 
   const charactersData = await fetchJson('scenario/characters/characters.json');
   if (params.has('mock')) {
@@ -144,9 +151,10 @@ async function main() {
   }
 
   // ── 게임 시작 (save가 없으면 처음부터)
-  async function startGame(save) {
+  async function startGame(save, jump = null) {
     sheet.close();
     const state = save ? save.state : createState(config);
+    if (jump) jump.spec.apply(state);
     const clock = createClock();
     const speed = Number(params.get('speed'));
     if (speed > 0) clock.setSpeed(speed);
@@ -171,6 +179,10 @@ async function main() {
 
     // 불러오기: 저장된 기록으로 대화방을 다시 만든 뒤, 저장 위치부터 진행
     const notices = [];
+    if (jump) {
+      notices.push(`QA 점프: ${jump.sceneId}부터${jump.spec.summary ? ` (${jump.spec.summary})` : ''}. 저장은 QA 전용 영역에 따로 됩니다.`);
+      for (const e of jump.spec.errors) notices.push(`QA 상태 지정 오류: ${e}`);
+    }
     if (!canStore) notices.push('이 브라우저에서는 저장할 수 없어 새로고침하면 처음부터 시작합니다 (사생활 보호 모드 등).');
     if (save) {
       const rebuilt = await rebuildRooms(state, loadScene, config);
@@ -211,7 +223,7 @@ async function main() {
     game = { runner, presenter, clock };
     if (pauses.size) clock.pause();
 
-    const sceneId = params.get('scene') ?? 'prologue_s1';
+    const sceneId = jump?.sceneId ?? 'prologue_s1';
     if (!parseSceneId(sceneId)) throw new Error(`잘못된 장면 ID: ${sceneId}`);
     const from = save ? save.state.position : { sceneId };
     try {
@@ -236,6 +248,10 @@ async function main() {
   if (loadKey) {
     const r = readSave(loadKey, store);
     if (r.ok) return startGame(r.save);
+  }
+  if (qaJump) {
+    if (!parseSceneId(qaJump)) throw new Error(`잘못된 장면 ID: ${qaJump}`);
+    return startGame(null, { sceneId: qaJump, spec: parseStateSpec(params.get('state'), config) });
   }
   if (params.has('new')) return startGame(null);
   showTitle();

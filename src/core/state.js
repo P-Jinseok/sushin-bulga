@@ -16,6 +16,7 @@ export function createState(config) {
     rooms: {},
     clock: { day: null, time: null },
     seq: 0, // 대화 기록 전체 순번 (방 목록 최근 순 정렬에 사용)
+    battery: 100, // 게임 속 휴대폰 배터리 (fx battery)
   };
 }
 
