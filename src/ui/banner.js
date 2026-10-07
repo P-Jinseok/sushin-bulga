@@ -1,14 +1,10 @@
-// 상단 알림 배너 (M2-6). 지금 보고 있지 않은 방에 메시지가 오거나 fx notify가 실행되면 잠깐 보여 준다.
-// 탭하면 그 방으로 이동한다. 새 알림이 오면 내용을 바꾸고 표시 시간을 다시 센다.
-// 표시 시간은 게임 시계(clock)가 아니라 실제 시간이다 (연출이 아니라 화면 안내이므로).
+// 상단 알림 배너 (M2-6, DEC-060). 지금 보고 있지 않은 방에 메시지가 오거나 fx notify가 실행되면 보여 준다.
+// 배너를 탭하면 그 방으로 바로 이동한다. 표시 시간 규칙은 banner-schedule.js (최소 3초, 대체 전 최소 1초).
 
 import { h } from './dom.js';
-
-const SHOW_MS = 3500;
+import { createBannerSchedule } from './banner-schedule.js';
 
 export function createBanner({ display, onOpen }) {
-  let room = null;
-  let timer = 0;
   const avatarSlot = h('span', { class: 'banner__avatar' });
   const name = h('span', { class: 'banner__name' });
   const text = h('span', { class: 'banner__text' });
@@ -20,8 +16,8 @@ export function createBanner({ display, onOpen }) {
       hidden: true,
       'aria-live': 'polite',
       onclick: () => {
-        const target = room;
-        hide();
+        const target = schedule.current?.room;
+        schedule.hide();
         if (target) onOpen(target);
       },
     },
@@ -29,27 +25,31 @@ export function createBanner({ display, onOpen }) {
     h('span', { class: 'banner__body' }, name, text),
   );
 
-  function hide() {
-    clearTimeout(timer);
-    el.hidden = true;
-    room = null;
-  }
+  const schedule = createBannerSchedule({
+    render(content) {
+      if (!content) {
+        el.hidden = true;
+        return;
+      }
+      avatarSlot.replaceChildren(display.avatar(content.room, 'sm'));
+      name.textContent = display.name(content.room);
+      text.textContent = content.text;
+      el.setAttribute('aria-label', `${display.name(content.room)}: ${content.text} (눌러서 대화방 열기)`);
+      el.hidden = false;
+    },
+  });
 
   return {
     el,
-    hide,
+    show: (content) => schedule.show(content),
+    hide: () => schedule.hide(),
     get room() {
-      return room;
+      return schedule.current?.room ?? null;
     },
-    show({ room: r, text: t }) {
-      room = r;
-      avatarSlot.replaceChildren(display.avatar(r, 'sm'));
-      name.textContent = display.name(r);
-      text.textContent = t;
-      el.hidden = false;
-      el.setAttribute('aria-label', `${display.name(r)}: ${t} (눌러서 대화방 열기)`);
-      clearTimeout(timer);
-      timer = setTimeout(hide, SHOW_MS);
+    // 최소 표시 시간(3초)이 남아 있는 동안은 true → 화면 탭 건너뛰기를 막는다
+    get holding() {
+      return schedule.minRemaining() > 0;
     },
+    minRemaining: () => schedule.minRemaining(),
   };
 }

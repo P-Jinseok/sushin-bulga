@@ -53,13 +53,15 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
   let pending = null; // 대기 중인 선택지 { room, view, resolve }
   let ended = false;
   let deferredRoom = null; // DEC-045: 첫 메시지(또는 배너 탭) 때 열 방
+  let deferredOpenTimer = 0; // DEC-060: 배너 최소 3초가 지난 뒤 열기
 
   const roomOf = (id) => {
     if (!rooms.has(id)) rooms.set(id, { id, items: [], unread: 0, seq: 0, typing: null });
     return rooms.get(id);
   };
 
-  const chat = createChatView({ display, onBack: () => openList(), onSkip: () => clock.skip(), onMenu });
+  // 화면 탭 = 대기 건너뛰기. 단, 알림 배너가 최소 표시 시간(3초) 안이면 건너뛰지 않는다 (DEC-060)
+  const chat = createChatView({ display, onBack: () => openList(), onSkip: () => banner.holding || clock.skip(), onMenu });
   const list = createRoomList({ display, onOpen: (id) => openRoom(id), onMenu });
   // 선택지 영역이 생기거나 사라지면 메시지 목록 높이가 바뀐다 → 맨 아래를 보고 있었다면 유지
   const choices = Object.fromEntries(
@@ -185,8 +187,17 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
       r.items.push(item);
       r.seq = entry.seq ?? r.seq + 1;
       if (item.kind === 'system') fx.titleDrop(text); // 엔딩 직전 암전 중이면 문구를 암전 위에 (대화 기록에도 남음)
-      if (room === deferredRoom) openRoom(room); // 미뤄 둔 방은 첫 메시지가 오면 연다 (방금 넣은 메시지까지 그려짐)
-      else if (room === current) chat.append(item);
+      if (room === deferredRoom) {
+        // 미뤄 둔 방은 첫 메시지가 오면 연다 (방금 넣은 메시지까지 그려짐).
+        // 그 방 알림 배너가 아직 최소 3초가 안 됐으면 3초가 될 때 연다 (DEC-060)
+        const wait = banner.room === room ? banner.minRemaining() : 0;
+        if (wait <= 0) openRoom(room);
+        else if (!deferredOpenTimer)
+          deferredOpenTimer = setTimeout(() => {
+            deferredOpenTimer = 0;
+            if (deferredRoom === room) openRoom(room);
+          }, wait);
+      } else if (room === current) chat.append(item);
       else if (item.kind === 'other') {
         r.unread++;
         banner.show({ room, text });
