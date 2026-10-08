@@ -20,7 +20,8 @@ export function createChoiceView(area) {
     clear,
 
     // view: runner가 준 { options[{index,text,enabled,hint}], timer, meter }. onPick(index)
-    show(view, onPick) {
+    // onTick(sec): 제한시간 마지막 5초 동안 남은 초가 바뀔 때마다 (효과음 timer_tick, 지시서 #20)
+    show(view, onPick, { onTick } = {}) {
       clear();
       let picked = false;
       const buttons = view.options.map((o) =>
@@ -56,7 +57,10 @@ export function createChoiceView(area) {
             const left = m.remaining();
             fill.style.width = `${(100 * left) / m.total}%`;
             const sec = Math.ceil(left / 1000);
-            if (sec !== lastSec) label.textContent = `남은 시간 ${(lastSec = sec)}초`;
+            if (sec !== lastSec) {
+              label.textContent = `남은 시간 ${(lastSec = sec)}초`;
+              if (sec > 0 && sec <= 5) onTick?.(sec);
+            }
           }
           raf = requestAnimationFrame(tick);
         };

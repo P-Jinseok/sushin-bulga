@@ -922,7 +922,26 @@ button:focus-visible {
 
 .title__settings,
 .sheet__settings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-top: 8px;
+}
+
+/* 소리 설정 줄 (지시서 #20): [켬/끔] 볼륨 막대 숫자 */
+.sound__range {
+  flex: 1 1 120px;
+  max-width: 200px;
+  min-height: var(--touch);
+  accent-color: var(--accent);
+}
+
+.sound__value {
+  min-width: 2.5em;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 /* 엔딩 직전 암전 위 문구 (타이틀 드롭, DEC-057). 엔딩 카드(가운데)와 겹치지 않게 화면 위쪽에 둔다 */

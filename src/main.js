@@ -25,12 +25,15 @@ import { AUTO_KEY, writeSave, readSave, listSaves, summarize, storageAvailable, 
 import { rebuildRooms } from './save/transcript.js';
 import { createPresenter } from './ui/presenter.js';
 import { createSaveSheet } from './ui/save-sheet.js';
-import { createTitleScreen, createGalleryScreen } from './ui/screens.js';
+import { createTitleScreen, createGalleryScreen, createCreditsScreen } from './ui/screens.js';
 import { createDebugPanel } from './ui/debug-panel.js';
-import { readSettings, applySettings } from './ui/settings.js';
+import { readSettings, applySettings, onSettingsChange } from './ui/settings.js';
 import { parseStateSpec } from './core/qa-state.js';
 import { PUBLIC_BUILD } from './build-config.js';
 import { createAvatar } from './ui/avatar.js';
+import { loadAssetManifest, parseCredits } from './data/assets.js';
+import { createAudioManager, parseCues, SFX_BASE } from './audio/audio.js';
+import { createWebAudioBackend } from './audio/web-audio.js';
 
 const params = new URLSearchParams(location.search);
 const dataParam = params.get('data');
@@ -89,6 +92,31 @@ async function main() {
   }
 
   const endingsData = await fetchJson('scenario/endings.json');
+  // 소재 (지시서 #20): 이미지 ID 표, 효과음 큐, 크레딧. 없거나 틀리면 소재 없이 지금처럼 동작한다
+  const optional = (url) => fetchJson(url).catch(() => null);
+  const [, cuesData, creditsData] = await Promise.all([loadAssetManifest(fetchJson), optional(SFX_BASE + 'cues.json'), optional('assets/credits.json')]);
+  const credits = parseCredits(creditsData);
+  const audio = createAudioManager({ backend: createWebAudioBackend(), cues: parseCues(cuesData), settings: readSettings() });
+  // QA(debug): 소재가 없어도 어떤 큐가 언제 불렸는지 확인할 수 있게 window.__sfxLog에 남긴다 (재생 여부와 관계없이)
+  if (params.has('debug')) {
+    const log = (globalThis.__sfxLog = []);
+    const play = audio.play;
+    audio.play = (id, opts) => {
+      log.push({ id, gain: opts?.gain ?? 1, quiet: audio.state.quiet, at: Math.round(performance.now()) });
+      return play(id, opts);
+    };
+  }
+  onSettingsChange((s) => audio.setSound(s));
+  // 모바일은 사용자 입력 안에서만 소리를 열 수 있다: 첫 입력에서 잠금 해제, 버튼 탭마다 ui_tap
+  for (const type of ['touchend', 'click', 'keydown']) document.addEventListener(type, () => audio.unlock(), { capture: true });
+  // 캡처 단계에서 듣는다: 선택지 버튼은 자기 클릭 처리에서 곧바로 disabled가 되므로 버블 단계에서는 놓친다
+  document.addEventListener(
+    'click',
+    (e) => {
+      if (e.target instanceof Element && e.target.closest('button:not([disabled])')) audio.play('ui_tap');
+    },
+    { capture: true },
+  );
   const config = createConfig(charactersData, endingsData);
   const loadScene = createSceneLoader(dataBase());
   const store = scopedStorage();
@@ -128,7 +156,10 @@ async function main() {
     on ? pauses.add(reason) : pauses.delete(reason);
     if (game) pauses.size ? game.clock.pause() : game.clock.resume();
   };
-  document.addEventListener('visibilitychange', () => setPaused('hidden', document.hidden));
+  document.addEventListener('visibilitychange', () => {
+    setPaused('hidden', document.hidden);
+    audio.setHidden(document.hidden); // 탭 전환·화면 꺼짐이면 소리도 멈춤
+  });
   const loadAndRestart = (key) => {
     once.set('mvn.loadKey', key);
     location.reload();
@@ -177,6 +208,7 @@ async function main() {
       onContinue: () => startGame(auto.save),
       onLoad: () => sheet.open({ loadOnly: true }),
       onGallery: () => app.replaceChildren(createGalleryScreen(gallery(), { onBack: showTitle }), sheet.el),
+      onCredits: credits.length ? () => app.replaceChildren(createCreditsScreen(credits, { onBack: showTitle }), sheet.el) : null,
     });
     app.replaceChildren(title, sheet.el);
     title.querySelector('button')?.focus();
@@ -204,6 +236,7 @@ async function main() {
       onChange: () => debug?.update(),
       onMenu: () => sheet.open(),
       getGallery: gallery, // 엔딩 화면은 달성 수만 쓴다 (summary는 엔딩 화면에 표시하지 않음)
+      sound: audio,
     });
     app.append(sheet.el);
     if (params.has('debug')) {
@@ -219,8 +252,12 @@ async function main() {
     }
     if (!canStore) notices.push('이 브라우저에서는 저장할 수 없어 새로고침하면 처음부터 시작합니다 (사생활 보호 모드 등).');
     if (save) {
-      const rebuilt = await rebuildRooms(state, loadScene, config);
-      presenter.restore(rebuilt);
+      // 지난 대화를 다시 그리는 동안에는 소리를 내지 않는다 (지시서 #20)
+      const rebuilt = await audio.quietly(async () => {
+        const r = await rebuildRooms(state, loadScene, config);
+        presenter.restore(r);
+        return r;
+      });
       if (rebuilt.missing) notices.push(`시나리오가 바뀌어 지난 대화 ${rebuilt.missing}개를 표시하지 못했습니다.`);
     }
     const sceneStart = presenter.sceneStart;

@@ -1,0 +1,18 @@
+{
+  "ui_tap":        { "file": null, "volume": 0.6, "cooldownMs": 60 },
+  "msg_in":        { "file": null, "volume": 0.9, "cooldownMs": 80 },
+  "msg_out":       { "file": null, "volume": 0.8, "cooldownMs": 80 },
+  "notify":        { "file": null, "volume": 1.0, "cooldownMs": 400 },
+  "typing":        { "file": null, "volume": 0.4, "cooldownMs": 300, "enabled": false },
+  "timer_tick":    { "file": null, "volume": 0.7, "cooldownMs": 500 },
+  "time_jump":     { "file": null, "volume": 0.8, "cooldownMs": 400 },
+  "glitch":        { "file": null, "volume": 0.9, "cooldownMs": 400 },
+  "shake":         { "file": null, "volume": 0.9, "cooldownMs": 400 },
+  "blackout":      { "file": null, "volume": 1.0, "cooldownMs": 600 },
+  "send_fail":     { "file": null, "volume": 0.9, "cooldownMs": 400 },
+  "delete_msg":    { "file": null, "volume": 0.8, "cooldownMs": 300 },
+  "ending_good":   { "file": null, "volume": 1.0, "cooldownMs": 1000 },
+  "ending_normal": { "file": null, "volume": 1.0, "cooldownMs": 1000 },
+  "ending_bad":    { "file": null, "volume": 1.0, "cooldownMs": 1000 },
+  "ending_true":   { "file": null, "volume": 1.0, "cooldownMs": 1000 }
+}

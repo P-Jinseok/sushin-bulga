@@ -42,6 +42,6 @@
     {"id": "c2_033", "type": "msg", "speaker": "chaerin", "text": "집 가까워요. 가면 바로 문자할게요 ㅎㅎ", "delay": 2200},
     {"id": "c2_034", "type": "msg", "speaker": "dohha", "text": "도착하면 바로 문자 줘요. 문 잠그는 것도 잊지 말고요.", "delay": 1120},
     {"id": "c2_035", "type": "msg", "speaker": "chaerin", "text": "넵~ 약속이에요ㅠㅠ", "delay": 1800},
-    {"id": "c2_036", "type": "end_scene", "next": "chaerin_s3"}
+    {"id": "c2_036", "type": "end_scene", "next": "chaerin_s21"}
   ]
 }

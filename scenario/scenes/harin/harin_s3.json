@@ -33,6 +33,6 @@
     {"id": "h3_024", "type": "msg", "speaker": "harin", "text": "맞는 말이에요.", "delay": 2200},
     {"id": "h3_025", "type": "msg", "speaker": "harin", "text": "그런데 지금은 그 말이 너무 아파요.", "delay": 3000},
     {"id": "h3_026", "type": "msg", "speaker": "harin", "text": "죄송해요. 오늘은 여기까지 할게요.", "delay": 2600, "next": "h3_g_end"},
-    {"id": "h3_g_end", "type": "end_scene", "next": "harin_s4"}
+    {"id": "h3_g_end", "type": "end_scene", "next": "harin_s31"}
   ]
 }

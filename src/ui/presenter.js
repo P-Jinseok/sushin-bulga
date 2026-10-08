@@ -9,6 +9,10 @@
 // - 선택지가 다른 방에 있으면 선택지 영역에 "○○ 대화방에서 답장 대기" 버튼을 보여 준다.
 //   배너는 잠깐 뜨는 새 메시지 알림, 답장 대기 버튼은 계속 남는 안내로 역할을 나눈다.
 // - 대화 기록이 없는 인물은 방 목록에 없다. 첫 메시지가 도착하면 방이 생긴다 (DEC-038).
+//
+// 효과음 (지시서 #20): 실시간 사건에서만 울린다. 불러오기(restore)로 다시 그리는 기록에서는 울리지 않는다.
+//   상대 말풍선 msg_in, 도하 전송 msg_out, 다른 방 메시지 배너·fx notify는 notify(새벽 장면이면 볼륨 0.5),
+//   fx 종류별 같은 이름 큐, 엔딩 ending_<유형>, 제한시간 마지막 5초 timer_tick. 버튼 탭(ui_tap)은 main에서.
 
 import { h } from './dom.js';
 import { createAvatar } from './avatar.js';
@@ -18,6 +22,7 @@ import { createChoiceView } from './choice-view.js';
 import { createBanner } from './banner.js';
 import { createEndingScreen } from './screens.js';
 import { createFx } from './fx.js';
+import { FX_CUES, DAWN_GAIN, isDawn } from '../audio/audio.js';
 
 const TITLE_DROP_HOLD_MS = 1500;
 const STATE_FX = new Set(['delete_msg', 'send_fail', 'time_jump', 'battery']);
@@ -37,7 +42,8 @@ export function notifyBeforeFirstMsg(scene, startId) {
 }
 
 // onTitle: 타이틀로 돌아가기, getGallery: () => { seen, total } (엔딩 화면 표시용)
-export function createPresenter({ app, config, getState, clock, onTitle, onChange, onMenu, getGallery }) {
+export function createPresenter({ app, config, getState, clock, onTitle, onChange, onMenu, getGallery, sound = { play() {} } }) {
+  const notifySound = () => sound.play('notify', { gain: isDawn(getState().clock?.time) ? DAWN_GAIN : 1 });
   const display = {
     name(id) {
       const c = config.characters.get(id);
@@ -111,13 +117,17 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
     if (ended) return;
     if (!pending) return choices.clear();
     if (pending.room === current) {
-      choices.show(pending.view, (index) => {
-        const p = pending;
-        pending = null;
-        choices.clear();
-        renderList();
-        p.resolve(index);
-      });
+      choices.show(
+        pending.view,
+        (index) => {
+          const p = pending;
+          pending = null;
+          choices.clear();
+          renderList();
+          p.resolve(index);
+        },
+        { onTick: () => sound.play('timer_tick') },
+      );
     } else {
       const target = pending.room;
       choices.showWaiting(`${display.name(target)} 대화방에서 답장을 기다리고 있어요 ›`, () => openRoom(target));
@@ -187,6 +197,9 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
       r.items.push(item);
       r.seq = entry.seq ?? r.seq + 1;
       if (item.kind === 'system') fx.titleDrop(text); // 엔딩 직전 암전 중이면 문구를 암전 위에 (대화 기록에도 남음)
+      const toBanner = room !== deferredRoom && room !== current && item.kind === 'other';
+      if (item.kind === 'me') sound.play('msg_out');
+      else if (item.kind === 'other') toBanner ? notifySound() : sound.play('msg_in');
       if (room === deferredRoom) {
         // 미뤄 둔 방은 첫 메시지가 오면 연다 (방금 넣은 메시지까지 그려짐).
         // 그 방 알림 배너가 아직 최소 3초가 안 됐으면 3초가 될 때 연다 (DEC-060)
@@ -231,8 +244,10 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
     fx({ node, room, nextType, leadsToEnding }) {
       if (node.kind === 'notify') {
         banner.show({ room, text: node.text });
+        notifySound();
         return;
       }
+      if (FX_CUES.has(node.kind)) sound.play(node.kind);
       const shown = fx.run(node, room, { nextType, leadsToEnding });
       // core가 바꾼 상태(삭제·전송 실패·시각·배터리)를 화면에 반영 (상태 변경은 이 호출 직후 동기로 일어남)
       if (!STATE_FX.has(node.kind)) return shown;
@@ -260,6 +275,7 @@ export function createPresenter({ app, config, getState, clock, onTitle, onChang
       const { seen, total } = getGallery();
       const screen = createEndingScreen({ endingId, ending, isNew, seen, total, onTitle });
       const show = () => {
+        if (ending?.type) sound.play(`ending_${ending.type}`);
         app.append(screen);
         screen.querySelector('button')?.focus();
         onChange?.();

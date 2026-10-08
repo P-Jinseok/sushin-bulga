@@ -51,6 +51,6 @@
     {"id": "h2_042", "type": "msg", "speaker": "harin", "text": "오늘은 너무 늦었어요. 내일 아침에 다시 이야기해요.", "delay": 2800},
     {"id": "h2_043", "type": "msg", "speaker": "harin", "text": "집에 도착하면 꼭 문자 주세요.", "delay": 2200},
     {"id": "h2_044", "type": "msg", "speaker": "dohha", "text": "알겠어요.", "delay": 600},
-    {"id": "h2_045", "type": "end_scene", "next": "harin_s3"}
+    {"id": "h2_045", "type": "end_scene", "next": "harin_s21"}
   ]
 }

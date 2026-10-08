@@ -52,6 +52,6 @@
     {"id": "n2_043", "type": "msg", "speaker": "nayeon", "text": "이 사건을 아는 사람이야.", "delay": 1800},
     {"id": "n2_j_end", "type": "msg", "speaker": "nayeon", "text": "오늘 오후에 다시 연락할게. 휴대폰 꺼 두지 마.", "delay": 2200},
     {"id": "n2_045", "type": "msg", "speaker": "dohha", "text": "알겠어요.", "delay": 600},
-    {"id": "n2_046", "type": "end_scene", "next": "nayeon_s3"}
+    {"id": "n2_046", "type": "end_scene", "next": "nayeon_s21"}
   ]
 }

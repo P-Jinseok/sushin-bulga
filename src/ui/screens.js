@@ -3,14 +3,15 @@
 // 못 본 엔딩의 제목·유형·ID를 아예 담지 않으므로 여기서도 쓸 수 없다.
 
 import { h } from './dom.js';
-import { createTextSizeControl } from './settings.js';
+import { createTextSizeControl, createSoundControl } from './settings.js';
 
 export const TYPE_LABEL = { good: '굿 엔딩', normal: '노멀 엔딩', bad: '배드 엔딩', true: '트루 엔딩' };
 
 // 타이틀. actions: { onStart, onContinue?, onLoad, onGallery }. autoText가 있으면 이어하기를 보여 준다.
 // special(선택): 해금된 추가 항목 { avatar, name, onStart } — J 루트 진입 (지시서 #14). 해금 전에는 넘기지 않아 DOM에도 없다
 // announce(선택): 타이틀 위쪽에 한 번 보여 줄 안내 (예: 해금 알림)
-export function createTitleScreen({ autoText, notices = [], onStart, onContinue, onLoad, onGallery, special = null, announce = null }) {
+// onCredits(선택): 크레딧 항목이 있을 때만 넘긴다 → "크레딧" 메뉴 (지시서 #20)
+export function createTitleScreen({ autoText, notices = [], onStart, onContinue, onLoad, onGallery, special = null, announce = null, onCredits = null }) {
   const menu = h('div', { class: 'title__menu' });
   // 새로 시작하면 첫 장면 진입 때 자동 저장이 덮어써지므로, 이어하기가 있으면 한 번 더 묻는다
   const confirmNew = (go) => () => {
@@ -36,6 +37,7 @@ export function createTitleScreen({ autoText, notices = [], onStart, onContinue,
       specialButton(),
       h('button', { class: 'choice', type: 'button', onclick: onLoad }, '불러오기'),
       h('button', { class: 'choice', type: 'button', onclick: onGallery }, '엔딩 갤러리'),
+      onCredits ? h('button', { class: 'choice title__credits', type: 'button', onclick: onCredits }, '크레딧') : null,
     ];
     menu.replaceChildren(...items.filter(Boolean));
   }
@@ -48,7 +50,7 @@ export function createTitleScreen({ autoText, notices = [], onStart, onContinue,
     menu,
     notices.length ? h('div', { class: 'title__notices' }, notices.map((n) => h('p', {}, n))) : null,
     // 저장소 삭제 위험 안내 (DEC-051)
-    h('div', { class: 'title__settings' }, createTextSizeControl()),
+    h('div', { class: 'title__settings' }, createTextSizeControl(), createSoundControl()),
     h('p', { class: 'title__storage' }, '이 브라우저에 저장됩니다. 오래 접속하지 않으면 기록이 지워질 수 있어요'),
   );
 }
@@ -70,6 +72,27 @@ export function createGalleryScreen(model, { onBack }) {
               h('span', { class: 'gallery__type' }, TYPE_LABEL[it.type] ?? ''))
           : h('li', { class: 'gallery__item gallery__item--locked' }, h('span', { class: 'gallery__no' }, String(it.no)),
               h('span', { class: 'gallery__main' }, h('span', { class: 'gallery__title' }, '???'), it.hint ? h('span', { class: 'gallery__sub gallery__hint' }, it.hint) : null)),
+      ),
+    ),
+  );
+}
+
+// 크레딧. items: assets/credits.json의 항목 { id, title, author, source, license, checked, note } (지시서 #20)
+export function createCreditsScreen(items, { onBack }) {
+  return h(
+    'section',
+    { class: 'screen gallery credits', 'aria-label': '크레딧' },
+    h('header', { class: 'list-header' }, h('button', { class: 'icon-btn', type: 'button', 'aria-label': '타이틀로', onclick: onBack }, '‹'), h('span', {}, '크레딧')),
+    h(
+      'ul',
+      { class: 'gallery__list credits__list' },
+      items.map((c) =>
+        h('li', { class: 'gallery__item credits__item' },
+          h('span', { class: 'gallery__main' },
+            h('span', { class: 'gallery__title' }, c.title || c.id),
+            h('span', { class: 'gallery__sub' }, [c.author, c.license].filter(Boolean).join(' · ')),
+            c.source ? h('span', { class: 'gallery__sub credits__source' }, c.source) : null,
+            c.note ? h('span', { class: 'gallery__sub' }, c.note) : null)),
       ),
     ),
   );

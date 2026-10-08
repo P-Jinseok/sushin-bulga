@@ -38,7 +38,7 @@
     {"id": "c3_029", "type": "msg", "speaker": "chaerin", "text": "'열쇠'래요ㅠㅠ", "delay": 1800},
     {"id": "c3_030", "type": "effect", "effects": {"clue": 1, "flags": {"found_note": true}}},
     {"id": "c3_031", "type": "msg", "speaker": "chaerin", "text": "아침에 다시 이야기해요 선배~", "delay": 2000},
-    {"id": "c3_032", "type": "end_scene", "next": "chaerin_s4"},
+    {"id": "c3_032", "type": "end_scene", "next": "chaerin_s31"},
     {"id": "c3_t_end", "type": "end_scene", "next": "chaerin_s5"}
   ]
 }
