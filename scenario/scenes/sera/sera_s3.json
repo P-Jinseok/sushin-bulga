@@ -27,6 +27,6 @@
     {"id": "se3_018", "type": "msg", "speaker": "sera", "text": "찾아내면 네가 나를 믿어도 되는 근거가 생겨.", "delay": 2200, "next": "se3_h_end"},
     {"id": "se3_h_end", "type": "msg", "speaker": "sera", "text": "잠깐 자. 6시 반에 이어서 이야기한다.", "delay": 1900},
     {"id": "se3_020", "type": "msg", "speaker": "dohha", "text": "알겠어요.", "delay": 600},
-    {"id": "se3_021", "type": "end_scene", "next": "sera_s4"}
+    {"id": "se3_021", "type": "end_scene", "next": "sera_s31"}
   ]
 }

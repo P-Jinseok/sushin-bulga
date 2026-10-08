@@ -36,6 +36,6 @@
     {"id": "se2_e_end", "type": "msg", "speaker": "sera", "text": "새벽에 확인할 게 있어. 다시 연락한다.", "delay": 2000},
     {"id": "se2_028", "type": "msg", "speaker": "sera", "text": "잠은 자 둬. 판단이 흐려져.", "delay": 1700},
     {"id": "se2_029", "type": "msg", "speaker": "dohha", "text": "알겠어요.", "delay": 600},
-    {"id": "se2_030", "type": "end_scene", "next": "sera_s3"}
+    {"id": "se2_030", "type": "end_scene", "next": "sera_s21"}
   ]
 }
